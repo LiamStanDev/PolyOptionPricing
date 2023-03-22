@@ -68,13 +68,25 @@ class DensityRecover:
          是使用lnS0 = S0下的cf
         """
         if isNorm:
-            inner = self.process.getCFValue(k * pi / (self.assume_true_b - self.assume_true_a)) * exp(
-                -i * k * pi * self.assume_true_a / (self.assume_true_b - self.assume_true_a))
-            return 2 / (self.assume_true_b - self.assume_true_a) * np.real(inner)
+            try:
+                inner = self.process.getCFValue(k * pi / (self.assume_true_b - self.assume_true_a)) * exp(
+                    -i * k * pi * self.assume_true_a / (self.assume_true_b - self.assume_true_a))
+                return 2 / (self.assume_true_b - self.assume_true_a) * np.real(inner)
+            except ZeroDivisionError:
+                k = 0.001
+                inner = self.process.getCFValue(k * pi / (self.assume_true_b - self.assume_true_a)) * exp(
+                    -i * k * pi * self.assume_true_a / (self.assume_true_b - self.assume_true_a))
+                return 2 / (self.assume_true_b - self.assume_true_a) * np.real(inner)
         else:
-            inner = self.process.getCFValue(k * pi / (self.assume_true_b - self.assume_true_a)) * \
-                    exp(i * k * pi * (self.x - self.assume_true_a) / (self.assume_true_b - self.assume_true_a))
-            return 2 / (self.assume_true_b - self.assume_true_a) * np.real(inner)
+            try:
+                inner = self.process.getCFValue(k * pi / (self.assume_true_b - self.assume_true_a)) * \
+                        exp(i * k * pi * (self.x - self.assume_true_a) / (self.assume_true_b - self.assume_true_a))
+                return 2 / (self.assume_true_b - self.assume_true_a) * np.real(inner)
+            except ZeroDivisionError:
+                k = 0.001
+                inner = self.process.getCFValue(k * pi / (self.assume_true_b - self.assume_true_a)) * exp(
+                    -i * k * pi * self.assume_true_a / (self.assume_true_b - self.assume_true_a))
+                return 2 / (self.assume_true_b - self.assume_true_a) * np.real(inner)
 
     def _density(self, x, isNorm=False):
         """

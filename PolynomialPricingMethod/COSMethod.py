@@ -25,9 +25,16 @@ class PolyByCosMethod:
         val = 0.0
         for k in range(self.N):
             if k == 0:
-                val += 0.5 * np.real(self.process_cf.getCFValue(k * pi / (self.upper_limit - self.lower_limit)) *
-                                     exp(i * k * pi * (self.x0 - self.lower_limit) / (
-                                             self.upper_limit - self.lower_limit))) * self._V(k)
+                try:
+                    val += 0.5 * np.real(self.process_cf.getCFValue(k * pi / (self.upper_limit - self.lower_limit)) *
+                                         exp(i * k * pi * (self.x0 - self.lower_limit) / (
+                                                 self.upper_limit - self.lower_limit))) * self._V(k)
+                # for the characteristic function like SVCDJ
+                except ZeroDivisionError:
+                    k = 0.001
+                    val += 0.5 * np.real(self.process_cf.getCFValue(k * pi / (self.upper_limit - self.lower_limit)) *
+                                         exp(i * k * pi * (self.x0 - self.lower_limit) / (
+                                                 self.upper_limit - self.lower_limit))) * self._V(k)
             else:
                 val += np.real(self.process_cf.getCFValue(k * pi / (self.upper_limit - self.lower_limit)) *
                                exp(i * k * pi * (self.x0 - self.lower_limit) / (

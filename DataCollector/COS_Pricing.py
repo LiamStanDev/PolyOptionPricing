@@ -31,7 +31,7 @@ gamma_var = 0.2
 delta = 1.326
 alpha = 15.624
 beta = 4.025
-# SVCDJ
+# SVJJ
 SVJJ_corr = -0.82
 SVJJ_corr_J = -0.38
 SVJJ_v_bar = 0.008
@@ -41,9 +41,9 @@ SVJJ_intensity = 0.47
 # SVJJ_mu_bar = -0.10
 SVJJ_sigma_y = 0.0001
 SVJJ_mu_v = 0.05
-SVJJ_corr = -0.38
-SVJJ_v_0 = 0.087
+SVJJ_v_0 = 0.087 ** 2
 SVJJ_mu_y = -0.03
+# SVCDJ
 
 processes = {
             #"GBM": GBM(r=r, sigma=sigma, T=T),
@@ -51,7 +51,7 @@ processes = {
            #"MJD": MJD(r=r, sigma=sigma, T=T, jump_intensity=jump_intensity, jump_mean=jump_mean, jump_var=jump_var),
            #"KJD": KJD(r=r, sigma=sigma, T=T, jump_intensity=jump_intensity_kdj, p=p, eat1=eta1, eat2=eta2),
            #"SVJ": SVJ(r=r, sigma=sigma, T=T, mean_reversion_speed=mean_reversion_speed, long_term_var_mean=long_term_var_mean, corr=corr, std_of_var_process=std_of_var_process, jump_intensity=jump_intensity, jump_mean=jump_mean, jump_var=jump_var),
-            "SVCDJ": SVCDJ(r=r, d=d, T=T, sigma=SVJJ_v_0, intensity=SVJJ_intensity, sigma_v=SVJJ_sigma_v, corr=SVJJ_corr, k_v=SVJJ_k_v, v_bar=SVJJ_v_bar, mu_v=SVJJ_mu_v, mu_y=SVJJ_mu_y,sigma_y=SVJJ_sigma_y, corr_J=SVJJ_corr_J),
+            "SVCDJ": SVJJ(r=r, d=d, T=T, sigma=sqrt(SVJJ_v_0), intensity=SVJJ_intensity, sigma_v=SVJJ_sigma_v, corr=SVJJ_corr, k_v=SVJJ_k_v, v_bar=SVJJ_v_bar, mu_v=SVJJ_mu_v, mu_y=SVJJ_mu_y, sigma_y=SVJJ_sigma_y, corr_J=SVJJ_corr_J),
            #"VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean,gamma_var=gamma_var),
            #"NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta)
 }
@@ -68,7 +68,7 @@ def Call():
         print(process_name)
         best_positive_interval = positive_interval.copy()
         densityRecover = DensityRecover(S0=S0, process_cf=processes[process_name], poly_coeff=poly_coeff,
-                                        positive_interval=positive_interval, error_acceptance=1e-4)
+                                        positive_interval=positive_interval, error_acceptance=1e-15)
         lower_limit, upper_limit, best_positive_interval[0], best_positive_interval[-1] = densityRecover.getIntegralRangeAndInterval()
 
         for N in N_list:
@@ -110,7 +110,7 @@ def LeftUp():
         print(process_name)
         best_positive_interval = positive_interval.copy()
         densityRecover = DensityRecover(S0=S0, process_cf=processes[process_name], poly_coeff=poly_coeff,
-                                        positive_interval=positive_interval, error_acceptance=1e-8)
+                                        positive_interval=positive_interval, error_acceptance=1e-15)
         lower_limit, upper_limit, best_positive_interval[0], best_positive_interval[
             -1] = densityRecover.getIntegralRangeAndInterval()
 

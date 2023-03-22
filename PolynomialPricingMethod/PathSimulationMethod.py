@@ -484,7 +484,7 @@ class SVJByMC:
         return mean, std
 
 
-class SVCDJByMC:
+class SVJJByMC:
     """
     Stochastic Volatility with Correlated Double Jump
     """
@@ -530,32 +530,36 @@ class SVCDJByMC:
 
         for i in range(0, self.n):
             if i % 20 == 0:
-                print(f"SVCDJ: {repeat + 1} round, {((i + 1) / self.n) * 100:.1f}%")
+                print(f"SVJJ: {repeat + 1} round, {((i + 1) / self.n) * 100:.1f}%")
 
             # antithetic + moment match
             norm_rv1 = np.random.randn(int(self.N_line / 2))
             norm_rv1 = np.append(norm_rv1, -norm_rv1)
             norm_rv1 = norm_rv1 / np.std(norm_rv1)
 
+
             norm_rv2 = np.random.randn(int(self.N_line / 2))
             norm_rv2 = np.append(norm_rv2, -norm_rv2)
             norm_rv2 = norm_rv2 / np.std(norm_rv2)
+
 
             norm_rv3 = np.random.randn(int(self.N_line / 2))
             norm_rv3 = np.append(norm_rv3, -norm_rv3)
             norm_rv3 = norm_rv3 / np.std(norm_rv3)
 
+
             # Cov(dW1t, dW2t)
             dW1t = norm_rv1 * pow(dt, 0.5)
-            dW2t = (norm_rv1 * self.corr + norm_rv2 * pow(1 - pow(self.corr, 2), 0.5)) * pow(dt, 0.5)
+            dW2t = norm_rv2 * pow(dt, 0.5)
+
             # variance jump level
             z_v = np.random.exponential(self.mu_v, self.N_line)
             # return jump level
             z_y = norm_rv3 * self.sigma_y + self.mu_y + self.corr_J * z_v
 
+
             jumps = np.random.poisson(self.intensity * dt, self.N_line)
 
-            # deal with jump > 1
             dJ_Yt = z_y * jumps
             dJ_Vt = z_v * jumps
             over_jump_ind = np.squeeze(np.argwhere(jumps > 1), axis=1)
@@ -567,7 +571,7 @@ class SVCDJByMC:
                     dJ_Yt[j] = np.sum(list(map(lambda z: np.random.normal(self.mu_y + self.corr_J * z, self.sigma_y), over_jump_z_v)))
 
             Yt = Yt + (self.r - self.d - self.intensity * mu_bar - 0.5 * Vt) * dt + sqrt(Vt) * dW1t + dJ_Yt
-            Vt = Vt + self.k_v * (self.v_bar - Vt) * dt + sqrt(Vt) * dW2t + dJ_Vt
+            Vt = Vt + self.k_v * (self.v_bar - Vt) * dt + sqrt(Vt) * (self.corr * self.sigma_v * dW1t + sqrt(1 - self.corr ** 2) * self.sigma_v * dW2t) + dJ_Vt
             Vt = np.where(Vt > 0, Vt, 0)
 
         ST = exp(Yt)
@@ -575,9 +579,9 @@ class SVCDJByMC:
         value = np.mean(payoff) * exp(-self.r * self.T)
         return value
 
-    def getStatistic(self, save_data=False, save_dir="", file_name="SVCDJ"):
+    def getStatistic(self, save_data=False, save_dir="", file_name="SVJJ"):
         values = []
-        print("SVCDJ simulation starting...")
+        print("SVJJ simulation starting...")
         for i in range(self.N_repeat):
             values.append(self.getValue(i))
 
@@ -587,7 +591,7 @@ class SVCDJByMC:
         upper_bound = mean + 2 * std
         if save_data:
             with open(save_dir + f"/{file_name}", "a+") as file:
-                s = f"\nProcess: SVCDJ\n" \
+                s = f"\nProcess: SVJJ\n" \
                     f"Polynomial Coefficient: {self.poly_coeff}\n" \
                     f"Parameters:\n" \
                     f"Result:\n" \
@@ -756,11 +760,33 @@ class NIGByMC:
 
 
 if __name__ == "__main__":
+    # Basic
     r = 0.06
     d = 0.0
     T = 0.25
     sigma = 0.2
-
+    # Stochastic volatility
+    std_of_var_process = 0.1
+    mean_reversion_speed = 3
+    long_term_var_mean = 0.04
+    corr = -0.1
+    # Jump process
+    jump_intensity = 140
+    jump_mean = 0.01
+    jump_var = 0.02 ** 2
+    # KDJ
+    jump_intensity_kdj = 1
+    p = 0.4
+    eta1 = 10
+    eta2 = 5
+    # Gamma
+    gamma_mean = -0.14
+    gamma_var = 0.2
+    # NIG
+    delta = 1.326
+    alpha = 15.624
+    beta = 4.025
+    # SVJJ
     SVJJ_corr = -0.82
     SVJJ_corr_J = -0.38
     SVJJ_v_bar = 0.008
@@ -770,13 +796,14 @@ if __name__ == "__main__":
     # SVJJ_mu_bar = -0.10
     SVJJ_sigma_y = 0.0001
     SVJJ_mu_v = 0.05
-    SVJJ_corr = -0.38
-    SVJJ_v_0 = 0.087
+    SVJJ_v_0 = 0.087 ** 2
     SVJJ_mu_y = -0.03
+    # SVCDJ
 
-    S0 = 120
-    coeff = [-100, 1]
+    S0 = 100
+    poly_coeff = [-100, 1]
 
-    SVCDJByMC(S0, r, d, T, sigma, SVJJ_intensity, SVJJ_sigma_v, SVJJ_corr, SVJJ_k_v, SVJJ_v_bar, SVJJ_mu_v, SVJJ_mu_y, SVJJ_sigma_y, SVJJ_corr_J, coeff,
+    SVJJByMC(S0=S0, r=r, d=d, T=T, sigma=sqrt(SVJJ_v_0), intensity=SVJJ_intensity, sigma_v=SVJJ_sigma_v, corr=SVJJ_corr,
+             k_v=SVJJ_k_v, v_bar=SVJJ_v_bar, mu_v=SVJJ_mu_v, mu_y=SVJJ_mu_y, sigma_y=SVJJ_sigma_y, corr_J=SVJJ_corr_J, poly_coeff=poly_coeff,
                  N_line=int(1e5), n=252, N_repeat=20)\
-        .getStatistic(save_data=True, save_dir="./", file_name="SVCDJ.txt")
+        .getStatistic(save_data=True, save_dir="./", file_name="SVJJ.txt")
