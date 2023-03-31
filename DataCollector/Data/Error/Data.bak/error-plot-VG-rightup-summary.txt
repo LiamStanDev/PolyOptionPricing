@@ -1,0 +1,47 @@
+                 Results: Ordinary least squares
+==================================================================
+Model:              OLS              Adj. R-squared:     0.970    
+Dependent Variable: y                AIC:                1243.9330
+Date:               2023-03-22 16:37 BIC:                1263.5600
+No. Observations:   999              Log-Likelihood:     -617.97  
+Df Model:           3                F-statistic:        1.077e+04
+Df Residuals:       995              Prob (F-statistic): 0.00     
+R-squared:          0.970            Scale:              0.20256  
+--------------------------------------------------------------------
+           Coef.    Std.Err.      t       P>|t|     [0.025    0.975]
+--------------------------------------------------------------------
+const     21.0025     0.0572   367.3490   0.0000   20.8903   21.1147
+x1        -0.0065     0.0001   -65.1859   0.0000   -0.0066   -0.0063
+x2         0.0000     0.0000    37.2319   0.0000    0.0000    0.0000
+x3        -0.0000     0.0000   -27.6509   0.0000   -0.0000   -0.0000
+------------------------------------------------------------------
+Omnibus:            246.824     Durbin-Watson:        1.121       
+Prob(Omnibus):      0.000       Jarque-Bera (JB):     834.211     
+Skew:               -1.176      Prob(JB):             0.000       
+Kurtosis:           6.809       Condition No.:        189456904010
+==================================================================
+* The condition number is large (2e+11). This might indicate
+strong multicollinearity or other numerical problems.                 Results: Ordinary least squares
+==================================================================
+Model:              OLS              Adj. R-squared:     0.971    
+Dependent Variable: y                AIC:                187.7746 
+Date:               2023-03-26 11:59 BIC:                200.0502 
+No. Observations:   159              Log-Likelihood:     -89.887  
+Df Model:           3                F-statistic:        1796.    
+Df Residuals:       155              Prob (F-statistic): 4.05e-120
+R-squared:          0.972            Scale:              0.18605  
+--------------------------------------------------------------------
+           Coef.    Std.Err.      t       P>|t|     [0.025    0.975]
+--------------------------------------------------------------------
+const      2.6551     0.1401    18.9485   0.0000    2.3783    2.9319
+x1        -0.0393     0.0015   -25.9813   0.0000   -0.0423   -0.0363
+x2         0.0001     0.0000    14.6310   0.0000    0.0001    0.0001
+x3        -0.0000     0.0000   -10.7310   0.0000   -0.0000   -0.0000
+------------------------------------------------------------------
+Omnibus:              43.325      Durbin-Watson:         1.321    
+Prob(Omnibus):        0.000       Jarque-Bera (JB):      88.681   
+Skew:                 -1.224      Prob(JB):              0.000    
+Kurtosis:             5.720       Condition No.:         786526556
+==================================================================
+* The condition number is large (8e+08). This might indicate
+strong multicollinearity or other numerical problems.

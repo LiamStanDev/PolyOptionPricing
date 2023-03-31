@@ -1,0 +1,24 @@
+                 Results: Ordinary least squares
+=================================================================
+Model:              OLS              Adj. R-squared:     0.996   
+Dependent Variable: y                AIC:                25.5300 
+Date:               2023-03-22 16:36 BIC:                32.4807 
+No. Observations:   42               Log-Likelihood:     -8.7650 
+Df Model:           3                F-statistic:        3569.   
+Df Residuals:       38               Prob (F-statistic): 1.32e-46
+R-squared:          0.996            Scale:              0.098233
+-------------------------------------------------------------------
+           Coef.    Std.Err.      t      P>|t|     [0.025    0.975]
+-------------------------------------------------------------------
+const      9.7318     0.2121   45.8849   0.0000    9.3024   10.1612
+x1        -0.0333     0.0084   -3.9455   0.0003   -0.0504   -0.0162
+x2        -0.0002     0.0001   -2.2604   0.0296   -0.0004   -0.0000
+x3        -0.0000     0.0000   -0.3657   0.7166   -0.0000    0.0000
+-----------------------------------------------------------------
+Omnibus:              19.041      Durbin-Watson:         1.189   
+Prob(Omnibus):        0.000       Jarque-Bera (JB):      24.090  
+Skew:                 -1.519      Prob(JB):              0.000   
+Kurtosis:             5.131       Condition No.:         16002323
+=================================================================
+* The condition number is large (2e+07). This might indicate
+strong multicollinearity or other numerical problems.

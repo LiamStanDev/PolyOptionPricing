@@ -7,8 +7,8 @@ from PolynomialPricingMethod.utils.Tools import timeit
 ###################### Process Setting ######################
 # Basic
 r = 0.06
-d = 0.0
-T = 0.25
+# d = 0.06
+T = 0.5
 sigma = 0.2
 # Stochastic volatility
 std_of_var_process = 0.1
@@ -44,6 +44,17 @@ SVJJ_mu_v = 0.05
 SVJJ_v_0 = 0.087 ** 2
 SVJJ_mu_y = -0.03
 # SVCDJ
+SVCDJ_Y_bar = 0.49
+SVCDJ_Y_0 = 0.0968
+SVCDJ_corr = - 0.1
+SVCDJ_intensity = 1.64
+SVCDJ_mu_0 = -0.03
+SVCDJ_mu_xy = -7.78
+SVCDJ_sigma_xy = 0.22
+SVCDJ_theta_y = 0.0036
+SVCDJ_sigma_y = 0.61
+SVCDJ_k_y = 5.06
+
 
 processes = {
             #"GBM": GBM(r=r, sigma=sigma, T=T),
@@ -51,9 +62,10 @@ processes = {
            #"MJD": MJD(r=r, sigma=sigma, T=T, jump_intensity=jump_intensity, jump_mean=jump_mean, jump_var=jump_var),
            #"KJD": KJD(r=r, sigma=sigma, T=T, jump_intensity=jump_intensity_kdj, p=p, eat1=eta1, eat2=eta2),
            #"SVJ": SVJ(r=r, sigma=sigma, T=T, mean_reversion_speed=mean_reversion_speed, long_term_var_mean=long_term_var_mean, corr=corr, std_of_var_process=std_of_var_process, jump_intensity=jump_intensity, jump_mean=jump_mean, jump_var=jump_var),
-            "SVCDJ": SVJJ(r=r, d=d, T=T, sigma=sqrt(SVJJ_v_0), intensity=SVJJ_intensity, sigma_v=SVJJ_sigma_v, corr=SVJJ_corr, k_v=SVJJ_k_v, v_bar=SVJJ_v_bar, mu_v=SVJJ_mu_v, mu_y=SVJJ_mu_y, sigma_y=SVJJ_sigma_y, corr_J=SVJJ_corr_J),
+        #"SVJJ": SVJJ(r=r, d=d, T=T, sigma=sqrt(SVJJ_v_0), intensity=SVJJ_intensity, sigma_v=SVJJ_sigma_v, corr=SVJJ_corr, k_v=SVJJ_k_v, v_bar=SVJJ_v_bar, mu_v=SVJJ_mu_v, mu_y=SVJJ_mu_y, sigma_y=SVJJ_sigma_y, corr_J=SVJJ_corr_J),
+            #"SVCDJ": SVCDJ(r=r, d=d, T=T, sigma=sqrt(SVCDJ_Y_0), intensity=SVCDJ_intensity, corr=SVCDJ_corr, k_y=SVCDJ_k_y, sigma_y=SVCDJ_sigma_y, theta_y=SVCDJ_theta_y, mu_xy=SVCDJ_mu_xy, Y_bar=SVCDJ_Y_bar, mu_0=SVCDJ_mu_0, sigma_xy=SVCDJ_sigma_xy)
            #"VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean,gamma_var=gamma_var),
-           #"NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta)
+           "NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta)
 }
 
 N_list = [32, 64, 128, 256, 512, 1024, 10000]

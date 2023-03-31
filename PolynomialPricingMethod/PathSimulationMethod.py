@@ -602,6 +602,125 @@ class SVJJByMC:
                 file.write(s)
         return mean, std
 
+class SVCDJByMC:
+    """
+    Stochastic Volatility with Correlated Double Jump(Guo 2009)
+    """
+
+    def __init__(self, S0, r, d, T, sigma, intensity, corr, sigma_y, poly_coeff, k_y, theta_y, mu_xy, Y_bar, mu_0, sigma_xy,
+                 N_line=int(1e6), n=252, N_repeat=20):
+        self.S0 = S0
+        self.r = r
+        self.d = d
+        self.T = T
+        self.Y_0 = sigma ** 2
+        self.sigma_y = sigma_y
+        self.corr = corr
+        self.k_y = k_y
+        self.theta_y = theta_y
+        self.mu_xy = mu_xy
+        self.intensity = intensity
+        self.Y_bar = Y_bar
+        self.mu_0 = mu_0
+        self.sigma_xy = sigma_xy
+
+        self.poly_coeff = poly_coeff
+
+        self.N_line = N_line
+        self.n = n
+        self.N_repeat = N_repeat
+
+    def _payoff(self, price):
+        payoff = 0
+        for power, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price ** power
+        return max(payoff, 0)
+
+    def getValue(self, repeat):
+        dt = self.T / self.n
+
+        Yt = np.full(self.N_line, log(self.S0))
+        Vt = np.full(self.N_line, self.Y_0)
+
+        k = exp(self.mu_0 + 0.5 * self.sigma_xy ** 2) / (1 - self.theta_y * self.mu_xy) - 1
+
+        for i in range(0, self.n):
+            if i % 20 == 0:
+                print(f"SVCDJ: {repeat + 1} round, {((i + 1) / self.n) * 100:.1f}%")
+
+            # antithetic + moment match
+            norm_rv1 = np.random.randn(int(self.N_line / 2))
+            norm_rv1 = np.append(norm_rv1, -norm_rv1)
+            norm_rv1 = norm_rv1 / np.std(norm_rv1)
+
+
+            norm_rv2 = np.random.randn(int(self.N_line / 2))
+            norm_rv2 = np.append(norm_rv2, -norm_rv2)
+            norm_rv2 = norm_rv2 / np.std(norm_rv2)
+
+
+            norm_rv3 = np.random.randn(int(self.N_line / 2))
+            norm_rv3 = np.append(norm_rv3, -norm_rv3)
+            norm_rv3 = norm_rv3 / np.std(norm_rv3)
+
+
+            # Cov(dW1t, dW2t)
+            dW1t = norm_rv1 * pow(dt, 0.5)
+            dW2t = norm_rv2 * pow(dt, 0.5)
+
+            # variance jump level
+            z_v = np.random.exponential(self.theta_y, self.N_line)
+            # return jump level
+            z_y = norm_rv3 * self.sigma_xy + self.mu_0 + self.mu_xy * z_v
+
+
+            jumps = np.random.poisson(self.intensity * dt, self.N_line)
+
+            dJ_Yt = z_y * jumps
+            dJ_Vt = z_v * jumps
+            over_jump_ind = np.squeeze(np.argwhere(jumps > 1), axis=1)
+            # Deal with over-jump situation
+            if over_jump_ind.size > 0:
+                for j in over_jump_ind:
+                    over_jump_z_v = np.random.exponential(self.theta_y, jumps[j])
+                    dJ_Vt[j] = np.sum(over_jump_z_v)
+                    dJ_Yt[j] = np.sum(list(map(lambda z: np.random.normal(self.mu_0 + self.mu_xy * z, self.sigma_xy), over_jump_z_v)))
+
+            Yt = Yt + (self.r - self.d - self.intensity * k - 0.5 * Vt) * dt + sqrt(Vt) * dW1t + dJ_Yt
+            Vt = Vt + (self.Y_bar - self.k_y * Vt) * dt + sqrt(Vt) * (self.corr * self.sigma_y * dW1t + sqrt(1 - self.corr ** 2) * self.sigma_y * dW2t) + dJ_Vt
+            Vt = np.where(Vt > 0, Vt, 0)
+
+        ST = exp(Yt)
+        payoff = list(map(self._payoff, ST))
+        value = np.mean(payoff) * exp(-self.r * self.T)
+        return value
+
+    def getStatistic(self, save_data=False, save_dir="", file_name="SVCDJ"):
+        values = []
+        print("SVCDJ simulation starting...")
+        for i in range(self.N_repeat):
+            values.append(self.getValue(i))
+
+        mean = np.mean(values).item()
+        std = np.std(values).item()
+        lower_bound = mean - 2 * std
+        upper_bound = mean + 2 * std
+        if save_data:
+            with open(save_dir + f"/{file_name}", "a+") as file:
+                s = f"\nProcess: SVCDJ\n" \
+                    f"Polynomial Coefficient: {self.poly_coeff}\n" \
+                    f"Parameters:\n" \
+                    f"Result:\n" \
+                    f"\tC.V.: ({lower_bound:.8f}, {upper_bound:.8f})\n" \
+                    f"\tmean: {mean:.52f}\n" \
+                    f"\tstd: {std}\n"
+
+                file.write(s)
+        return mean, std
+
+
+
+
 class VGByMC:
     """
     Variance Gamma model
@@ -762,7 +881,7 @@ class NIGByMC:
 if __name__ == "__main__":
     # Basic
     r = 0.06
-    d = 0.0
+    d = 0.06
     T = 0.25
     sigma = 0.2
     # Stochastic volatility
@@ -799,11 +918,25 @@ if __name__ == "__main__":
     SVJJ_v_0 = 0.087 ** 2
     SVJJ_mu_y = -0.03
     # SVCDJ
+    SVCDJ_Y_bar = 0.49
+    SVCDJ_Y_0 = 0.0968
+    SVCDJ_corr = - 0.1
+    SVCDJ_intensity = 1.64
+    SVCDJ_mu_0 = -0.03
+    SVCDJ_mu_xy = -7.78
+    SVCDJ_sigma_xy = 0.22
+    SVCDJ_theta_y = 0.0036
+    SVCDJ_sigma_y = 0.61
+    SVCDJ_k_y = 5.06
 
     S0 = 100
     poly_coeff = [-100, 1]
-
-    SVJJByMC(S0=S0, r=r, d=d, T=T, sigma=sqrt(SVJJ_v_0), intensity=SVJJ_intensity, sigma_v=SVJJ_sigma_v, corr=SVJJ_corr,
-             k_v=SVJJ_k_v, v_bar=SVJJ_v_bar, mu_v=SVJJ_mu_v, mu_y=SVJJ_mu_y, sigma_y=SVJJ_sigma_y, corr_J=SVJJ_corr_J, poly_coeff=poly_coeff,
-                 N_line=int(1e5), n=252, N_repeat=20)\
-        .getStatistic(save_data=True, save_dir="./", file_name="SVJJ.txt")
+    #
+    # SVJJByMC(S0=S0, r=r, d=d, T=T, sigma=sqrt(SVJJ_v_0), intensity=SVJJ_intensity, sigma_v=SVJJ_sigma_v, corr=SVJJ_corr,
+    #          k_v=SVJJ_k_v, v_bar=SVJJ_v_bar, mu_v=SVJJ_mu_v, mu_y=SVJJ_mu_y, sigma_y=SVJJ_sigma_y, corr_J=SVJJ_corr_J, poly_coeff=poly_coeff,
+    #              N_line=int(1e5), n=252, N_repeat=20)\
+    #     .getStatistic(save_data=True, save_dir="./", file_name="SVJJ.txt")
+    SVCDJByMC(S0=S0, r=r, d=d, T=T, sigma=sqrt(SVCDJ_Y_0), intensity=SVCDJ_intensity, corr=SVCDJ_corr, k_y=SVCDJ_k_y, sigma_y=SVCDJ_sigma_y,
+              theta_y=SVCDJ_theta_y, mu_xy=SVCDJ_mu_xy, Y_bar=SVCDJ_Y_bar, mu_0=SVCDJ_mu_0, sigma_xy=SVCDJ_sigma_xy, poly_coeff=poly_coeff,
+                 N_line=int(1e6), n=252, N_repeat=20) \
+        .getStatistic(save_data=True, save_dir="./", file_name="SVCDJ.txt")

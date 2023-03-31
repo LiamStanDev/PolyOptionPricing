@@ -230,7 +230,7 @@ class NIG(CharacteristicFunction):
 
 class SVJJ(CharacteristicFunction):
     """
-    Stochastic Volatility Model With Correlated Double Jumps
+    Stochastic Volatility Model With Correlated Double Jumps(Duffie)
     """
 
     def __init__(self, r, d, T, sigma, intensity, sigma_v, corr, k_v, v_bar, mu_v, mu_y, sigma_y, corr_J):
@@ -250,7 +250,9 @@ class SVJJ(CharacteristicFunction):
 
     def getCFValue(self, u):
         if u == 0:
-            raise ZeroDivisionError
+            return self._getCFValue(0.0001)
+        return self._getCFValue(u)
+    def _getCFValue(self, u):
         b = self.sigma_v * self.corr * i * u - self.k_v
         a = i * u * (1 - i * u)
         gamma = sqrt(b ** 2 + a * self.sigma_v ** 2)
@@ -276,47 +278,44 @@ class SVJJ(CharacteristicFunction):
 
 class SVCDJ(CharacteristicFunction):
     """
-    Stochastic Volatility Model With Correlated Double Jumps
+    Stochastic Volatility Model With Correlated Double Jumps(Guo 2009)
     """
 
-    def __init__(self, r, d, T, sigma, intensity, sigma_v, corr, k_v, v_bar, mu_v, mu_y, sigma_y, corr_J):
+    def __init__(self, r, d, T, sigma, intensity, corr, k_y, sigma_y, theta_y, mu_xy, Y_bar, mu_0, sigma_xy):
         self.r = r
         self.d = d
         self.T = T
-        self.v0 = sigma ** 2
-        self.intensity = intensity
-        self.sigma_v = sigma_v
-        self.corr = corr
-        self.k_v = k_v
-        self.v_bar = v_bar
-        self.mu_v = mu_v
-        self.mu_y = mu_y
+        self.Y_0 = sigma ** 2
         self.sigma_y = sigma_y
-        self.corr_J = corr_J
+        self.corr = corr
+        self.k_y = k_y
+        self.theta_y = theta_y
+        self.mu_xy = mu_xy
+        self.intensity = intensity
+        self.Y_bar = Y_bar
+        self.mu_0 = mu_0
+        self.sigma_xy = sigma_xy
 
     def getCFValue(self, u):
         if u == 0:
-            # raise ZeroDivisionError
-            return 1
-        b = self.sigma_v * self.corr * i * u - self.k_v
-        a = i * u * (1 - i * u)
-        gamma = sqrt(b ** 2 + a * self.sigma_v ** 2)
-        beta = - a * (1 - exp(-gamma * self.T)) / (2 * gamma - (gamma + b) * (1 - exp(- gamma * self.T)))
+            return self._getCFValue(0.0001)
+        return self._getCFValue(u)
 
-        alpha_0 = -self.r * self.T + (self.r - self.d) * i * u * self.T - self.k_v * self.v_bar * (
-                (gamma + b) / power(self.sigma_v, 2) * self.T + 2 / power(self.sigma_v, 2) * log(
-            1 - (gamma + b) / (2 * gamma) * (1 - exp(-gamma * self.T)))
-        )
-        c = 1 - self.corr_J * self.mu_v * i * u
+    def _getCFValue(self, u):
+        e = sqrt((i * u * self.sigma_y * self.corr - self.k_y) ** 2 - i * u * (i * u - 1) * self.sigma_y ** 2)
+        b = e + i * u * self.sigma_y * self.corr - self.k_y
+        q = i * u * (i * u - 1) * self.theta_y + b * (1 - self.theta_y * i * u * self.mu_xy)
+        p = 2 * e * (1 - self.theta_y * i * u * self.mu_xy) - q
+        B = i * u * (i * u - 1) * (1 - exp(-e * self.T)) / (
+                    2 * e - (e + i * u * self.sigma_y * self.corr - self.k_y) * (1 - exp(-e * self.T)))
+        A = (i * u * (self.r - self.d) - self.r) * self.T
+        A -= self.Y_bar / power(self.sigma_y, 2) * (
+                    (e + i * u * self.sigma_y * self.corr - self.k_y) * self.T + 2 * log(
+                1 - (e + i * u * self.sigma_y * self.corr - self.k_y) * (1 - exp(-e * self.T)) / (2 * e)))
+        A -= i * u * self.intensity * (exp(self.mu_0 + 0.5 * self.sigma_xy ** 2) / (
+                    1 - self.theta_y * self.mu_xy) - 1) * self.T + self.intensity * self.T
+        A += self.intensity * (2 * e - b) * exp(i * u * self.mu_0 - 0.5 * u ** 2 * self.sigma_xy ** 2) * self.T / p
+        A += 2 * self.intensity * self.theta_y * i * u * (i * u - 1) * exp(
+            i * u * self.mu_0 - 0.5 * u ** 2 * self.sigma_xy ** 2) / (p * q) * log((p + q * exp(-e * self.T)) / (p + q))
 
-        d = (gamma - b) / ((gamma - b) * c + self.mu_v * a) * self.T \
-            - 2 * self.mu_v * a / (power(gamma * c, 2) - power(b * c - self.mu_v * a, 2)) * log(
-            1 - ((gamma + b) * c - self.mu_v * a) / (2 * gamma * c) * (1 - exp(-gamma * self.T)))
-        f = exp(self.mu_y * i * u + 0.5 * self.sigma_y ** 2 * (i * u) ** 2) * d
-
-        theta = lambda c1, c2: exp(self.mu_y * c1 + 0.5 * power(self.sigma_y * c1, 2)) / (
-                1 - self.mu_v * c2 - self.corr_J * self.mu_v * c1)
-        mu_bar = theta(1, 0) - 1
-        alpha = alpha_0 - self.intensity * self.T * (1 + mu_bar * i * u) + self.intensity * f
-
-        return exp(alpha + beta * self.v0)
+        return exp(A + B * self.Y_0)

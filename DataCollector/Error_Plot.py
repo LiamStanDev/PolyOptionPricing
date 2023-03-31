@@ -1,10 +1,12 @@
 from PolynomialPricingMethod.COSMethod import PolyByCosMethod
 from PolynomialPricingMethod.utils.CharacteristicFunc import *
 from PolynomialPricingMethod.utils.DensityTools import DensityRecover
-from PolynomialPricingMethod.utils.plot_utils import plotError
+from PolynomialPricingMethod.utils.plot_utils import plotError, plotErrorRegression
 from PricingMethod.CallCloseForm import BSMCloseForm, MertonCloseForm
 from math import inf
 from PolynomialPricingMethod.utils.Tools import timeit
+import numpy as np
+from deprecated import deprecated
 
 # ###################### Process Setting ######################
 # Basic
@@ -51,7 +53,7 @@ processes = {
             "MJD": MJD(r=r, sigma=sigma, T=T, jump_intensity=jump_intensity, jump_mean=jump_mean, jump_var=jump_var),
            "KJD": KJD(r=r, sigma=sigma, T=T, jump_intensity=jump_intensity_kdj, p=p, eat1=eta1, eat2=eta2),
            "SVJ": SVJ(r=r, sigma=sigma, T=T, mean_reversion_speed=mean_reversion_speed, long_term_var_mean=long_term_var_mean, corr=corr, std_of_var_process=std_of_var_process, jump_intensity=jump_intensity, jump_mean=jump_mean, jump_var=jump_var),
-           # "SVCDJ": SVCDJ(r=r, T=T, Y=SVCDJ_Y, intensity=SVCDJ_intensity,mu0=SVCDJ_mu0, mu_xy=SVCDJ_mu_xy, sigma_xy=SVCDJ_sigma_xy, sigma_y=SVCDJ_sigma_y, corr=SVCDJ_corr, Y_bar=SVCDJ_Y_bar, theta_y=SVCDJ_theta_y, k_y=SVCDJ_k_y),
+           #"SVCDJ": SVCDJ(r=r, T=T, Y=SVCDJ_Y, intensity=SVCDJ_intensity,mu0=SVCDJ_mu0, mu_xy=SVCDJ_mu_xy, sigma_xy=SVCDJ_sigma_xy, sigma_y=SVCDJ_sigma_y, corr=SVCDJ_corr, Y_bar=SVCDJ_Y_bar, theta_y=SVCDJ_theta_y, k_y=SVCDJ_k_y),
            "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean,gamma_var=gamma_var),
            "NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta)
 }
@@ -88,14 +90,14 @@ def Call():
 
 
 
-        plot_N_Config = {"GBM": list(range(0, 1000, 16))[1:],
-                        "Heston": list(range(0, 1000, 16))[1:],
-                        "MJD": list(range(0, 1000, 16))[1:],
-                        "KJD": list(range(0, 1000, 16))[1:],
-                        "SVJ": list(range(0, 1000, 16))[1:],
-                        "SVCDJ": list(range(0, 5000, 50))[1:],
-                        "VG": list(range(0, 5000, 250))[1:],
-                        "NIG": list(range(0, 1000, 40))[1:]}
+        plot_N_Config = {"GBM": list(range(0, 1000, 1))[1:],
+                        "Heston": list(range(0, 1000, 1))[1:],
+                        "MJD": list(range(0, 1000, 1))[1:],
+                        "KJD": list(range(0, 1000, 1))[1:],
+                        "SVJ": list(range(0, 1000, 1))[1:],
+                        "SVCDJ": list(range(0, 5000, 1))[1:],
+                        "VG": list(range(0, 5000, 1))[1:],
+                        "NIG": list(range(0, 1000, 1))[1:]}
 
         N_list = plot_N_Config[process_name]
         val_list = []
@@ -103,8 +105,7 @@ def Call():
             res = PolyByCosMethod(S0=S0, T=T, r=r, sigma=sigma, process_cf=processes[process_name], poly_coeff=poly_coeff, positive_interval=best_positive_interval, N=N, lower_limit=lower_limit, upper_limit=upper_limit)
             ans, time_consuming = timeit(res.getValue)
             val_list.append(ans)
-        plotError(N_list, np.abs(np.array(val_list) - ref_val), process_name + "-call", "Close-Form",
-                  save_path=f"./Data/Error/Call")
+        plotErrorRegression(N_list, np.abs(np.array(val_list) - ref_val), "./Data/Error", "error-plot-" + process_name + "-call")
     print(ref_val_close_form)
 def RightUp():
     # Polynomial Setting
@@ -122,8 +123,13 @@ def RightUp():
     for process_name in processes.keys():
         print(process_name)
         best_positive_interval = positive_interval.copy()
-        densityRecover = DensityRecover(S0=S0, process_cf=processes[process_name], poly_coeff=poly_coeff,
-                                        positive_interval=positive_interval, error_acceptance=1e-15)
+        # VG 會爆掉
+        if process_name == "VG":
+            densityRecover = DensityRecover(S0=S0, process_cf=processes[process_name], poly_coeff=poly_coeff,
+                                            positive_interval=positive_interval, error_acceptance=1e-12)
+        else:
+            densityRecover = DensityRecover(S0=S0, process_cf=processes[process_name], poly_coeff=poly_coeff,
+                                            positive_interval=positive_interval, error_acceptance=1e-15)
         lower_limit, upper_limit, best_positive_interval[0], best_positive_interval[
             -1] = densityRecover.getIntegralRangeAndInterval()
         ref_val = PolyByCosMethod(S0=S0, T=T, r=r, sigma=sigma, process_cf=processes[process_name],
@@ -131,26 +137,27 @@ def RightUp():
                                   positive_interval=best_positive_interval, N=10000, lower_limit=lower_limit,
                                   upper_limit=upper_limit).getValue()
         ref_val_close_form[process_name] = ref_val
-        # plot_N_Config = {"GBM": list(range(0, 1000, 16))[1:],
-        #                  "Heston": list(range(0, 1000, 32))[1:],
-        #                  "MJD": list(range(0, 1000, 16))[1:],
-        #                  "KJD": list(range(0, 1000, 32))[1:],
-        #                  "SVJ": list(range(0, 1000, 16))[1:],
-        #                  "SVCDJ": list(range(0, 5000, 36))[1:],
-        #                  "VG": list(range(0, 5000, 500))[1:],
-        #                  "NIG": list(range(0, 1000, 30))[1:]}
-        #
-        # val_list = []
-        # N_list = plot_N_Config[process_name]
-        # for N in N_list:
-        #     res = PolyByCosMethod(S0=S0, T=T, r=r, sigma=sigma, process_cf=processes[process_name], poly_coeff=poly_coeff,
-        #                           positive_interval=best_positive_interval, N=N, lower_limit=lower_limit,
-        #                           upper_limit=upper_limit)
-        #     ans, time_consuming = timeit(res.getValue)
-        #     val_list.append(ans)
-        # plotError(N_list, np.abs(np.array(val_list) - ref_val), process_name + "-rightup", "Close-Form",
-        #           save_path=f"./Data/Error/RightUp")
-    print(ref_val_close_form)
+        plot_N_Config = {"GBM": list(range(0, 1000, 1))[1:],
+                         "Heston": list(range(0, 1000, 1))[1:],
+                         "MJD": list(range(0, 1000, 1))[1:],
+                         "KJD": list(range(0, 1000, 1))[1:],
+                         "SVJ": list(range(0, 1000, 1))[1:],
+                         "SVCDJ": list(range(0, 5000, 1))[1:],
+                         "VG": list(range(0, 5000, 1))[1:],
+                         "NIG": list(range(0, 1000, 1))[1:]}
+
+        val_list = []
+        N_list = plot_N_Config[process_name]
+        for N in N_list:
+            res = PolyByCosMethod(S0=S0, T=T, r=r, sigma=sigma, process_cf=processes[process_name], poly_coeff=poly_coeff,
+                                  positive_interval=best_positive_interval, N=N, lower_limit=lower_limit,
+                                  upper_limit=upper_limit)
+            ans, time_consuming = timeit(res.getValue)
+            val_list.append(ans)
+        plotErrorRegression(N_list, np.abs(np.array(val_list) - ref_val), "./Data/Error",
+                            "error-plot-" + process_name + "-rightup")
+    print(f"{ref_val_close_form['VG']:.15f}")
+@deprecated()
 def LeftUp():
     # Polynomial Setting
     S0 = 110
@@ -175,14 +182,14 @@ def LeftUp():
                                   positive_interval=best_positive_interval, N=10000, lower_limit=lower_limit,
                                   upper_limit=upper_limit).getValue()
         ref_val_close_form[process_name] = ref_val
-        plot_N_Config = {"GBM": list(range(0, 1000, 16))[1:],
-                         "Heston": list(range(0, 1000, 24))[1:],
-                         "MJD": list(range(0, 1000, 16))[1:],
-                         "KJD": list(range(0, 1000, 24))[1:],
-                         "SVJ": list(range(0, 1000, 16))[1:],
-                         "SVCDJ": list(range(0, 2000, 24))[1:],
-                         "VG": list(range(0, 5000, 200))[1:],
-                         "NIG": list(range(0, 1000, 30))[1:]}
+        plot_N_Config = {"GBM": list(range(0, 1000, 5))[1:],
+                         "Heston": list(range(0, 1000, 5))[1:],
+                         "MJD": list(range(0, 1000, 5))[1:],
+                         "KJD": list(range(0, 1000, 5))[1:],
+                         "SVJ": list(range(0, 1000, 5))[1:],
+                         "SVCDJ": list(range(0, 2000, 5))[1:],
+                         "VG": list(range(0, 5000, 5))[1:],
+                         "NIG": list(range(0, 1000, 5))[1:]}
         val_list = []
         N_list = plot_N_Config[process_name]
         for N in N_list:
@@ -191,9 +198,9 @@ def LeftUp():
                                   upper_limit=upper_limit)
             ans, time_consuming = timeit(res.getValue)
             val_list.append(ans)
-        plotError(N_list, np.abs(np.array(val_list) - ref_val), process_name + "-leftup", "Close-Form",
-                  save_path=f"./Data/Error/LeftUp")
+        plotErrorRegression(N_list, np.abs(np.array(val_list) - ref_val), "./Data/Error", "error-plot-" + process_name + "-leftup")
     print(ref_val_close_form)
+@deprecated()
 def BothUp():
     # Polynomial Setting
     S0 = 15
@@ -218,14 +225,14 @@ def BothUp():
                                   positive_interval=best_positive_interval, N=10000, lower_limit=lower_limit,
                                   upper_limit=upper_limit).getValue()
         ref_val_close_form[process_name] = ref_val
-        plot_N_Config = {"GBM": list(range(0, 1000, 16))[1:],
-                         "Heston": list(range(0, 1000, 18))[1:],
-                         "MJD": list(range(0, 1000, 10))[1:],
-                         "KJD": list(range(0, 1000, 34))[1:],
-                         "SVJ": list(range(0, 1000, 10))[1:],
-                         "SVCDJ": list(range(0, 2000, 36))[1:],
-                         "VG": list(range(0, 10000, 750))[1:],
-                         "NIG": list(range(0, 1000, 16))[1:]}
+        plot_N_Config = {"GBM": list(range(0, 1000, 5))[1:],
+                         "Heston": list(range(0, 1000, 5))[1:],
+                         "MJD": list(range(0, 1000, 5))[1:],
+                         "KJD": list(range(0, 1000, 5))[1:],
+                         "SVJ": list(range(0, 1000, 5))[1:],
+                         "SVCDJ": list(range(0, 2000, 5))[1:],
+                         "VG": list(range(0, 10000, 5))[1:],
+                         "NIG": list(range(0, 1000, 5))[1:]}
         val_list = []
         N_list = plot_N_Config[process_name]
         for N in N_list:
@@ -234,8 +241,8 @@ def BothUp():
                                   upper_limit=upper_limit)
             ans, time_consuming = timeit(res.getValue)
             val_list.append(ans)
-        plotError(N_list, np.abs(np.array(val_list) - ref_val), process_name + "-bothup", "Close-Form",
-                  save_path=f"./Data/Error/BothUp")
+        plotErrorRegression(N_list, np.abs(np.array(val_list) - ref_val), "./Data/Error",
+                            "error-plot-" + process_name + "-bothup")
     print(ref_val_close_form)
 def BothDown():
     # Polynomial Setting
@@ -261,36 +268,32 @@ def BothDown():
                                   positive_interval=best_positive_interval, N=10000, lower_limit=lower_limit,
                                   upper_limit=upper_limit).getValue()
         ref_val_close_form[process_name] = ref_val
-        # plot_N_Config = {"GBM": list(range(0, 1000, 32))[1:],
-        #                  "Heston": list(range(0, 1000, 32))[1:],
-        #                  "MJD": list(range(0, 1000, 6))[1:],
-        #                  "KJD": list(range(0, 1000, 32))[1:],
-        #                  "SVJ": list(range(0, 1000, 6))[1:],
-        #                  "SVCDJ": list(range(0, 1000, 20))[1:],
-        #                  "VG": list(range(0, 10000, 400))[1:],
-        #                  "NIG": list(range(0, 1000, 20))[1:]}
-        # val_list = []
-        # N_list = plot_N_Config[process_name]
-        # for N in N_list:
-        #     res = PolyByCosMethod(S0=S0, T=T, r=r, sigma=sigma, process_cf=processes[process_name], poly_coeff=poly_coeff,
-        #                           positive_interval=best_positive_interval, N=N, lower_limit=lower_limit,
-        #                           upper_limit=upper_limit)
-        #     ans, time_consuming = timeit(res.getValue)
-        #     val_list.append(ans)
-        # plotError(N_list, np.abs(np.array(val_list) - ref_val), process_name + "-bothdown", "Close-Form",
-        #           save_path=f"./Data/Error/BothDown")
+        plot_N_Config = {"GBM": list(range(0, 1000, 1))[1:],
+                         "Heston": list(range(0, 1000, 1))[1:],
+                         "MJD": list(range(0, 1000, 1))[1:],
+                         "KJD": list(range(0, 1000, 1))[1:],
+                         "SVJ": list(range(0, 1000, 1))[1:],
+                         "SVCDJ": list(range(0, 1000, 1))[1:],
+                         "VG": list(range(0, 10000, 1))[1:],
+                         "NIG": list(range(0, 1000, 1))[1:]}
+        val_list = []
+        N_list = plot_N_Config[process_name]
+        for N in N_list:
+            res = PolyByCosMethod(S0=S0, T=T, r=r, sigma=sigma, process_cf=processes[process_name], poly_coeff=poly_coeff,
+                                  positive_interval=best_positive_interval, N=N, lower_limit=lower_limit,
+                                  upper_limit=upper_limit)
+            ans, time_consuming = timeit(res.getValue)
+            val_list.append(ans)
+        plotErrorRegression(N_list, np.abs(np.array(val_list) - ref_val), "./Data/Error", "error-plot-" + process_name + "-bothdown")
     print(ref_val_close_form)
 if __name__ == "__main__":
-    # print("Call")
-    # Call()
-    # print("Right Up")
-    # RightUp()
-    # print("Left Up")
-    # LeftUp()
-    # print("Both Up")
-    # BothUp()
+    print("Call")
+    Call()
+    print("Right Up")
+    RightUp()
+    print("Left Up")
+    LeftUp()
+    print("Both Up")
+    BothUp()
     print("Both Down")
     BothDown()
-    # print(BSMCloseForm(S0=100, r=r, sigma=sigma, T=T, K=100).getValue())
-    # print(MertonCloseForm(S0=100, T=T, r=r, sigma=sigma, K=100, jump_intensity=jump_intensity, jump_mean=jump_mean,
-    #                 jump_var=jump_var).getValue(5000))

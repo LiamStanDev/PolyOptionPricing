@@ -138,7 +138,6 @@ class DensityRecover:
         while density_low > self.error_acceptance or density_high > self.error_acceptance or density_low_minus > density_low or density_high_plus > density_high:
             if density_low > self.error_acceptance or density_low_minus > density_low:
                 best_integral_low -= self.step
-                print(best_integral_low)
                 if best_integral_low < self.assume_true_a:
                     raise "need to lower the assume true density lower bound"
                 # update
