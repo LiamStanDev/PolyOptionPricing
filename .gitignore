@@ -6,3 +6,7 @@
 *.iml
 out
 gen
+.vscode/
+env/
+.mypy_cache/
+**/__pyche__/
