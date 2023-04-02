@@ -1,17 +1,25 @@
-import sys
-
-sys.path.append("/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing")
-
+from math import inf
+from deprecated import deprecated
+import numpy as np
+from numpy import sqrt
 from PolynomialPricingMethod.COSMethod import PolyByCosMethod
-from PolynomialPricingMethod.utils.CharacteristicFunc import *
+from PolynomialPricingMethod.utils.CharacteristicFunc import (
+    GBM,
+    Heston,
+    MJD,
+    KJD,
+    SVJ,
+    VG,
+    NIG,
+)
 from PolynomialPricingMethod.utils.DensityTools import DensityRecover
 from PolynomialPricingMethod.utils.plot_utils import plotErrorRegression
 from PricingMethod.CallCloseForm import BSMCloseForm, MertonCloseForm
-from math import inf
 from PolynomialPricingMethod.utils.Tools import timeit
-import numpy as np
-from deprecated import deprecated
 
+save_dir = (
+    "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/Error_Plot"
+)
 # ###################### Process Setting ######################
 # Basic
 r = 0.05
@@ -50,10 +58,11 @@ SVCDJ_Y_bar = 0.49
 SVCDJ_theta_y = 0.0036
 SVCDJ_k_y = 5.06
 
-
 processes = {
-    "GBM": GBM(r=r, sigma=sigma, T=T),
-    "Heston": Heston(
+    "GBM":
+    GBM(r=r, sigma=sigma, T=T),
+    "Heston":
+    Heston(
         r=r,
         sigma=sigma,
         T=T,
@@ -62,7 +71,8 @@ processes = {
         corr=corr,
         std_of_var_process=std_of_var_process,
     ),
-    "MJD": MJD(
+    "MJD":
+    MJD(
         r=r,
         sigma=sigma,
         T=T,
@@ -70,7 +80,8 @@ processes = {
         jump_mean=jump_mean,
         jump_var=jump_var,
     ),
-    "KJD": KJD(
+    "KJD":
+    KJD(
         r=r,
         sigma=sigma,
         T=T,
@@ -79,7 +90,8 @@ processes = {
         eat1=eta1,
         eat2=eta2,
     ),
-    "SVJ": SVJ(
+    "SVJ":
+    SVJ(
         r=r,
         sigma=sigma,
         T=T,
@@ -92,8 +104,10 @@ processes = {
         jump_var=jump_var,
     ),
     # "SVCDJ": SVCDJ(r=r, T=T, Y=SVCDJ_Y, intensity=SVCDJ_intensity,mu0=SVCDJ_mu0, mu_xy=SVCDJ_mu_xy, sigma_xy=SVCDJ_sigma_xy, sigma_y=SVCDJ_sigma_y, corr=SVCDJ_corr, Y_bar=SVCDJ_Y_bar, theta_y=SVCDJ_theta_y, k_y=SVCDJ_k_y),
-    "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
-    "NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta),
+    "VG":
+    VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
+    "NIG":
+    NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta),
 }
 
 
@@ -104,9 +118,12 @@ def Call():
     positive_interval = [100, inf]
 
     ref_val_close_form = {
-        "GBM": BSMCloseForm(S0=S0, r=r, sigma=sigma, T=T, K=100).getValue(),
-        "Heston": 6.8816576853411586256470400257967412471771240234375,
-        "MJD": MertonCloseForm(
+        "GBM":
+        BSMCloseForm(S0=S0, r=r, sigma=sigma, T=T, K=100).getValue(),
+        "Heston":
+        6.8816576853411586256470400257967412471771240234375,
+        "MJD":
+        MertonCloseForm(
             S0=S0,
             T=T,
             r=r,
@@ -116,10 +133,14 @@ def Call():
             jump_mean=jump_mean,
             jump_var=jump_var,
         ).getValue(5000),
-        "KJD": None,
-        "SVJ": None,
-        "VG": None,
-        "NIG": None,
+        "KJD":
+        None,
+        "SVJ":
+        None,
+        "VG":
+        None,
+        "NIG":
+        None,
         # "SVCDJ" : 12.609768306568486906371617806144058704376220703125
     }
 
@@ -187,7 +208,7 @@ def Call():
         plotErrorRegression(
             N_list,
             np.abs(np.array(val_list) - ref_val),
-            "./Data/Error",
+            save_dir,
             "error-plot-" + process_name + "-call",
         )
     print(ref_val_close_form)
@@ -278,7 +299,7 @@ def RightUp():
         plotErrorRegression(
             N_list,
             np.abs(np.array(val_list) - ref_val),
-            "./Data/Error",
+            save_dir,
             "error-plot-" + process_name + "-rightup",
         )
     print(f"{ref_val_close_form['VG']:.15f}")
@@ -358,7 +379,7 @@ def LeftUp():
         plotErrorRegression(
             N_list,
             np.abs(np.array(val_list) - ref_val),
-            "./Data/Error",
+            save_dir,
             "error-plot-" + process_name + "-leftup",
         )
     print(ref_val_close_form)
@@ -438,7 +459,7 @@ def BothUp():
         plotErrorRegression(
             N_list,
             np.abs(np.array(val_list) - ref_val),
-            "./Data/Error",
+            save_dir,
             "error-plot-" + process_name + "-bothup",
         )
     print(ref_val_close_form)
@@ -517,7 +538,7 @@ def BothDown():
         plotErrorRegression(
             N_list,
             np.abs(np.array(val_list) - ref_val),
-            "./Data/Error",
+            save_dir,
             "error-plot-" + process_name + "-bothdown",
         )
     print(ref_val_close_form)

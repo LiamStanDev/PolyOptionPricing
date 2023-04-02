@@ -1,16 +1,24 @@
 from math import inf
-import sys
-
-sys.path.append("/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing")
-
+import numpy as np
+from numpy import sqrt
 from PolynomialPricingMethod.COSMethod import PolyByCosMethod
-from PolynomialPricingMethod.utils.CharacteristicFunc import *
+from PolynomialPricingMethod.utils.CharacteristicFunc import (
+    GBM,
+    Heston,
+    MJD,
+    KJD,
+    SVJ,
+    VG,
+    NIG,
+)
 from PolynomialPricingMethod.utils.DensityTools import DensityRecover
-from PolynomialPricingMethod.utils.plot_utils import plotError, plotValueWithCV
+from PolynomialPricingMethod.utils.plot_utils import plotValueWithCV
 from PolynomialPricingMethod.utils.Tools import timeit
 
-save_dir = "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/DataCollector/Data/Error/Test"
 ###################### Process Setting ######################
+save_dir = (
+    "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/CI_Plot"
+)
 # Basic
 r = 0.05
 T = 0.5
@@ -47,7 +55,6 @@ SVCDJ_corr = -0.1
 SVCDJ_Y_bar = 0.49
 SVCDJ_theta_y = 0.0036
 SVCDJ_k_y = 5.06
-
 
 processes = {
     "GBM": GBM(r=r, sigma=sigma, T=T),

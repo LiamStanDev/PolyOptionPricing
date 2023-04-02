@@ -67,7 +67,6 @@ def plotValueWithCV(N_list, val_list, ci, std, save_dir, file_name, enableShow=F
     x = 1 / N_list
     mean_simulation = (ci[1] + ci[0]) / 2
     plt.plot(x, val_list - mean_simulation, color="r", marker=",", label="Error")
-    rangeOfValue = np.max(val_list) - np.min(val_list)
     cvRange = ci[1] - ci[0]
     plt.axhline(ci[1] - mean_simulation, color="black", linestyle="--", label="C.I")
     plt.axhline(ci[0] - mean_simulation, color="black", linestyle="--")

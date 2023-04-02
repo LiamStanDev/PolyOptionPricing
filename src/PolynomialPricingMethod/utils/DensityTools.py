@@ -1,11 +1,8 @@
 import numpy as np
-from numpy import pi, cos, log
+from numpy import pi, cos, log, exp
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 from math import inf
-from PolynomialPricingMethod.COSMethod import PolyByCosMethod
-from PolynomialPricingMethod.utils.CharacteristicFunc import *
 
 i = 1j
 

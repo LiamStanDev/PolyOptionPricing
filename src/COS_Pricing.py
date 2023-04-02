@@ -1,8 +1,5 @@
-import sys
+from PolynomialPricingMethod.utils.Tools import timeit
 from math import inf
-
-sys.path.append("/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing")
-
 from PolynomialPricingMethod.COSMethod import PolyByCosMethod
 from PolynomialPricingMethod.utils.CharacteristicFunc import (
     GBM,
@@ -15,7 +12,6 @@ from PolynomialPricingMethod.utils.CharacteristicFunc import (
     KJD,
 )
 from PolynomialPricingMethod.utils.DensityTools import DensityRecover
-from PolynomialPricingMethod.utils.Tools import timeit
 from numpy import sqrt
 
 ##################### Process Setting ######################
@@ -68,7 +64,6 @@ SVCDJ_sigma_xy = 0.22
 SVCDJ_theta_y = 0.0036
 SVCDJ_sigma_y = 0.61
 SVCDJ_k_y = 5.06
-
 
 processes = {
     "GBM": GBM(r=r, sigma=sigma, T=T),
@@ -125,10 +120,6 @@ processes = {
         sigma_y=SVJJ_sigma_y,
         corr_J=SVJJ_corr_J,
     ),
-    # "SVCDJ": SVCDJ(r=r, d=d, T=T, sigma=sqrt(SVCDJ_Y_0), intensity=SVCDJ_intensity,
-    #                corr=SVCDJ_corr, k_y=SVCDJ_k_y, sigma_y=SVCDJ_sigma_y,
-    #                theta_y=SVCDJ_theta_y, mu_xy=SVCDJ_mu_xy, Y_bar=SVCDJ_Y_bar,
-    #                mu_0=SVCDJ_mu_0, sigma_xy=SVCDJ_sigma_xy)
     "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
     "NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta),
 }

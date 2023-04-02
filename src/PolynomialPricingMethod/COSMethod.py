@@ -1,5 +1,5 @@
-from numpy import pi, sin, cos
-from PolynomialPricingMethod.utils.CharacteristicFunc import *
+import numpy as np
+from numpy import pi, sin, cos, log, exp
 
 i = 1j
 

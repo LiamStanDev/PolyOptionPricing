@@ -29,8 +29,8 @@ class GBMByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     # 計算一次蒙地卡羅的價格
@@ -127,8 +127,8 @@ class HestonByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def getValue(self, repeat):
@@ -231,8 +231,8 @@ class MJDByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def getValue(self, repeat):
@@ -343,8 +343,8 @@ class KJDByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def getValue(self, repeat):
@@ -468,8 +468,8 @@ class SVJByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def getValue(self, repeat):
@@ -608,8 +608,8 @@ class SVJJByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def getValue(self, repeat):
@@ -770,8 +770,8 @@ class SVCDJByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def getValue(self, repeat):
@@ -915,8 +915,8 @@ class VGByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def Xt_cf(self, u):
@@ -1017,8 +1017,8 @@ class NIGByMC:
 
     def _payoff(self, price):
         payoff = 0
-        for power, coeff in enumerate(self.poly_coeff):
-            payoff += coeff * price**power
+        for p, coeff in enumerate(self.poly_coeff):
+            payoff += coeff * price**p
         return max(payoff, 0)
 
     def Xt_cf(self, u):

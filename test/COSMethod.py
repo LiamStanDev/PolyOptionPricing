@@ -1,8 +1,7 @@
-from math import inf
 import sys
 
 sys.path.append("/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing")
-
+from math import inf
 from PolynomialPricingMethod.COSMethod import PolyByCosMethod
 from PolynomialPricingMethod.utils.CharacteristicFunc import Heston
 from PolynomialPricingMethod.utils.DensityTools import DensityRecover
