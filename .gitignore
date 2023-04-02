@@ -9,4 +9,5 @@ gen
 .vscode/
 env/
 .mypy_cache/
-**/__pyche__/
+**/__pycache__/
+src/Data/
