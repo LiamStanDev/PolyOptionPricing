@@ -10,4 +10,4 @@ gen
 env/
 .mypy_cache/
 **/__pycache__/
-src/Data/
+Data/
