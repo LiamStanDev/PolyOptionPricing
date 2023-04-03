@@ -59,10 +59,8 @@ SVCDJ_theta_y = 0.0036
 SVCDJ_k_y = 5.06
 
 processes = {
-    "GBM":
-    GBM(r=r, sigma=sigma, T=T),
-    "Heston":
-    Heston(
+    "GBM": GBM(r=r, sigma=sigma, T=T),
+    "Heston": Heston(
         r=r,
         sigma=sigma,
         T=T,
@@ -71,8 +69,7 @@ processes = {
         corr=corr,
         std_of_var_process=std_of_var_process,
     ),
-    "MJD":
-    MJD(
+    "MJD": MJD(
         r=r,
         sigma=sigma,
         T=T,
@@ -80,8 +77,7 @@ processes = {
         jump_mean=jump_mean,
         jump_var=jump_var,
     ),
-    "KJD":
-    KJD(
+    "KJD": KJD(
         r=r,
         sigma=sigma,
         T=T,
@@ -90,8 +86,7 @@ processes = {
         eat1=eta1,
         eat2=eta2,
     ),
-    "SVJ":
-    SVJ(
+    "SVJ": SVJ(
         r=r,
         sigma=sigma,
         T=T,
@@ -104,10 +99,8 @@ processes = {
         jump_var=jump_var,
     ),
     # "SVCDJ": SVCDJ(r=r, T=T, Y=SVCDJ_Y, intensity=SVCDJ_intensity,mu0=SVCDJ_mu0, mu_xy=SVCDJ_mu_xy, sigma_xy=SVCDJ_sigma_xy, sigma_y=SVCDJ_sigma_y, corr=SVCDJ_corr, Y_bar=SVCDJ_Y_bar, theta_y=SVCDJ_theta_y, k_y=SVCDJ_k_y),
-    "VG":
-    VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
-    "NIG":
-    NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta),
+    "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
+    "NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta),
 }
 
 
@@ -118,12 +111,9 @@ def Call():
     positive_interval = [100, inf]
 
     ref_val_close_form = {
-        "GBM":
-        BSMCloseForm(S0=S0, r=r, sigma=sigma, T=T, K=100).getValue(),
-        "Heston":
-        6.8816576853411586256470400257967412471771240234375,
-        "MJD":
-        MertonCloseForm(
+        "GBM": BSMCloseForm(S0=S0, r=r, sigma=sigma, T=T, K=100).getValue(),
+        "Heston": 6.8816576853411586256470400257967412471771240234375,
+        "MJD": MertonCloseForm(
             S0=S0,
             T=T,
             r=r,
@@ -133,27 +123,33 @@ def Call():
             jump_mean=jump_mean,
             jump_var=jump_var,
         ).getValue(5000),
-        "KJD":
-        None,
-        "SVJ":
-        None,
-        "VG":
-        None,
-        "NIG":
-        None,
+        "KJD": None,
+        "SVJ": None,
+        "VG": None,
+        "NIG": None,
         # "SVCDJ" : 12.609768306568486906371617806144058704376220703125
     }
 
     for process_name in processes.keys():
-        print(process_name)
+        print("========", process_name, "=============")
         best_positive_interval = positive_interval.copy()
-        densityRecover = DensityRecover(
-            S0=S0,
-            process_cf=processes[process_name],
-            poly_coeff=poly_coeff,
-            positive_interval=positive_interval,
-            error_acceptance=1e-15,
-        )
+        # VG 會爆掉
+        if process_name == "VG":
+            densityRecover = DensityRecover(
+                S0=S0,
+                process_cf=processes[process_name],
+                poly_coeff=poly_coeff,
+                positive_interval=positive_interval,
+                error_acceptance=1e-12,
+            )
+        else:
+            densityRecover = DensityRecover(
+                S0=S0,
+                process_cf=processes[process_name],
+                poly_coeff=poly_coeff,
+                positive_interval=positive_interval,
+                error_acceptance=1e-15,
+            )
         (
             lower_limit,
             upper_limit,
@@ -230,7 +226,7 @@ def RightUp():
         "NIG": None,
     }
     for process_name in processes.keys():
-        print(process_name)
+        print("========", process_name, "=============")
         best_positive_interval = positive_interval.copy()
         # VG 會爆掉
         if process_name == "VG":
@@ -321,7 +317,7 @@ def LeftUp():
         "NIG": None,
     }
     for process_name in processes.keys():
-        print(process_name)
+        print("========", process_name, "=============")
         best_positive_interval = positive_interval.copy()
         densityRecover = DensityRecover(
             S0=S0,
@@ -350,14 +346,14 @@ def LeftUp():
         ).getValue()
         ref_val_close_form[process_name] = ref_val
         plot_N_Config = {
-            "GBM": list(range(0, 1000, 5))[1:],
-            "Heston": list(range(0, 1000, 5))[1:],
-            "MJD": list(range(0, 1000, 5))[1:],
-            "KJD": list(range(0, 1000, 5))[1:],
-            "SVJ": list(range(0, 1000, 5))[1:],
-            "SVCDJ": list(range(0, 2000, 5))[1:],
-            "VG": list(range(0, 5000, 5))[1:],
-            "NIG": list(range(0, 1000, 5))[1:],
+            "GBM": list(range(0, 1000, 1))[1:],
+            "Heston": list(range(0, 1000, 1))[1:],
+            "MJD": list(range(0, 1000, 1))[1:],
+            "KJD": list(range(0, 1000, 1))[1:],
+            "SVJ": list(range(0, 1000, 1))[1:],
+            "SVCDJ": list(range(0, 2000, 1))[1:],
+            "VG": list(range(0, 5000, 1))[1:],
+            "NIG": list(range(0, 1000, 1))[1:],
         }
         val_list = []
         N_list = plot_N_Config[process_name]
@@ -401,7 +397,7 @@ def BothUp():
         "NIG": None,
     }
     for process_name in processes.keys():
-        print(process_name)
+        print("========", process_name, "=============")
         best_positive_interval = positive_interval.copy()
         densityRecover = DensityRecover(
             S0=S0,
@@ -430,14 +426,14 @@ def BothUp():
         ).getValue()
         ref_val_close_form[process_name] = ref_val
         plot_N_Config = {
-            "GBM": list(range(0, 1000, 5))[1:],
-            "Heston": list(range(0, 1000, 5))[1:],
-            "MJD": list(range(0, 1000, 5))[1:],
-            "KJD": list(range(0, 1000, 5))[1:],
-            "SVJ": list(range(0, 1000, 5))[1:],
-            "SVCDJ": list(range(0, 2000, 5))[1:],
-            "VG": list(range(0, 10000, 5))[1:],
-            "NIG": list(range(0, 1000, 5))[1:],
+            "GBM": list(range(0, 1000, 1))[1:],
+            "Heston": list(range(0, 1000, 1))[1:],
+            "MJD": list(range(0, 1000, 1))[1:],
+            "KJD": list(range(0, 1000, 1))[1:],
+            "SVJ": list(range(0, 1000, 1))[1:],
+            "SVCDJ": list(range(0, 2000, 1))[1:],
+            "VG": list(range(0, 10000, 1))[1:],
+            "NIG": list(range(0, 1000, 1))[1:],
         }
         val_list = []
         N_list = plot_N_Config[process_name]
@@ -480,7 +476,7 @@ def BothDown():
         "NIG": None,
     }
     for process_name in processes.keys():
-        print(process_name)
+        print("========", process_name, "=============")
         best_positive_interval = positive_interval.copy()
         densityRecover = DensityRecover(
             S0=S0,
@@ -545,13 +541,13 @@ def BothDown():
 
 
 if __name__ == "__main__":
-    print("Call")
+    print("===========Call==============")
     Call()
-    print("Right Up")
+    print("===========Right Up===========")
     RightUp()
-    print("Left Up")
-    LeftUp()
-    print("Both Up")
-    BothUp()
-    print("Both Down")
+    # print("Left Up")
+    # LeftUp()
+    # print("Both Up")
+    # BothUp()
+    print("==========Both Down==========")
     BothDown()

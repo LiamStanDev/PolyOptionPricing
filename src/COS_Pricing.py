@@ -1,5 +1,5 @@
-from PolynomialPricingMethod.utils.Tools import timeit
 from math import inf
+from PolynomialPricingMethod.utils.Tools import timeit
 from PolynomialPricingMethod.COSMethod import PolyByCosMethod
 from PolynomialPricingMethod.utils.CharacteristicFunc import (
     GBM,
