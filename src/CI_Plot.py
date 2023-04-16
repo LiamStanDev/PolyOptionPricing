@@ -16,9 +16,7 @@ from PolynomialPricingMethod.utils.plot_utils import plotValueWithCV
 from PolynomialPricingMethod.utils.Tools import timeit
 
 ###################### Process Setting ######################
-save_dir = (
-    "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/CI_Plot"
-)
+save_dir = "/home/liam/Documents/Projects/PolyOptionPricing/Data/CI_Plot"
 # Basic
 r = 0.05
 T = 0.5
@@ -97,8 +95,8 @@ processes = {
         jump_var=jump_var,
     ),
     # "SVCDJ": SVCDJ(r=r, T=T, Y=SVCDJ_Y, intensity=SVCDJ_intensity,mu0=SVCDJ_mu0, mu_xy=SVCDJ_mu_xy, sigma_xy=SVCDJ_sigma_xy, sigma_y=SVCDJ_sigma_y, corr=SVCDJ_corr, Y_bar=SVCDJ_Y_bar, theta_y=SVCDJ_theta_y, k_y=SVCDJ_k_y),
-    "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
     "NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta),
+    "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
 }
 
 
@@ -271,10 +269,10 @@ def LeftUp():
     }
 
     plot_N_Config = {
-        "GBM": np.array(list(range(80, 300, 1))),
-        "Heston": np.array(list(range(80, 300, 1))),
+        "GBM": np.array(list(range(40, 300, 1))),
+        "Heston": np.array(list(range(40, 300, 1))),
         "MJD": np.array(list(range(65, 150, 1))),
-        "KJD": np.array(list(range(65, 250, 1))),
+        "KJD": np.array(list(range(40, 250, 1))),
         "SVJ": np.array(list(range(50, 200, 1))),
         "SVCDJ": np.array(list(range(180, 400, 1))),
         "VG": np.array(list(range(85, 600, 1))),
@@ -347,10 +345,10 @@ def BothUp():
     }
 
     plot_N_Config = {
-        "GBM": np.array(list(range(100, 200, 1))),
-        "Heston": np.array(list(range(100, 200, 1))),
+        "GBM": np.array(list(range(40, 200, 1))),
+        "Heston": np.array(list(range(40, 200, 1))),
         "MJD": np.array(list(range(40, 150, 1))),
-        "KJD": np.array(list(range(180, 250, 1))),
+        "KJD": np.array(list(range(100, 250, 1))),
         "SVJ": np.array(list(range(40, 200, 1))),
         "SVCDJ": np.array(list(range(180, 400, 1))),
         "VG": np.array(list(range(2000, 4100, 20))),
@@ -486,9 +484,9 @@ if __name__ == "__main__":
     Call()
     print("Right Up")
     RightUp()
-    # print("Left Up")
-    # LeftUp()
-    # print("Both Up")
-    # BothUp()
+    print("Left Up")
+    LeftUp()
+    print("Both Up")
+    BothUp()
     print("Both Down")
     BothDown()

@@ -17,9 +17,7 @@ from PolynomialPricingMethod.utils.plot_utils import plotErrorRegression
 from PricingMethod.CallCloseForm import BSMCloseForm, MertonCloseForm
 from PolynomialPricingMethod.utils.Tools import timeit
 
-save_dir = (
-    "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/Error_Plot"
-)
+save_dir = "/home/liam/Documents/Projects/PolyOptionPricing/Data/Error_Plot"
 # ###################### Process Setting ######################
 # Basic
 r = 0.05
@@ -41,6 +39,7 @@ eta1 = 10
 eta2 = 5
 # Gamma
 gamma_mean = -0.14
+print(gamma_mean)
 gamma_var = 0.2
 # NIG
 delta = 1.326
@@ -99,8 +98,8 @@ processes = {
         jump_var=jump_var,
     ),
     # "SVCDJ": SVCDJ(r=r, T=T, Y=SVCDJ_Y, intensity=SVCDJ_intensity,mu0=SVCDJ_mu0, mu_xy=SVCDJ_mu_xy, sigma_xy=SVCDJ_sigma_xy, sigma_y=SVCDJ_sigma_y, corr=SVCDJ_corr, Y_bar=SVCDJ_Y_bar, theta_y=SVCDJ_theta_y, k_y=SVCDJ_k_y),
-    "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
     "NIG": NIG(r=r, T=T, delta=delta, alpha=alpha, beta=beta),
+    "VG": VG(r=r, sigma=sigma, T=T, gamma_mean=gamma_mean, gamma_var=gamma_var),
 }
 
 

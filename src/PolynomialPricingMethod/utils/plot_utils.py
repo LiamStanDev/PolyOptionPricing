@@ -6,7 +6,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from deprecated import deprecated
 import statsmodels.api as sm
 
-plt.rcParams["font.family"] = "Times New Roman"
+# plt.rcParams["font.family"] = "Times New Roman"
 
 
 @deprecated()
@@ -66,7 +66,7 @@ def plotValueWithCV(N_list, val_list, ci, std, save_dir, file_name, enableShow=F
     plt.figure()
     x = 1 / N_list
     mean_simulation = (ci[1] + ci[0]) / 2
-    plt.plot(x, val_list - mean_simulation, color="r", marker=",", label="Error")
+    plt.plot(x, val_list - mean_simulation, color="black", marker=",", label="Error")
     cvRange = ci[1] - ci[0]
     plt.axhline(ci[1] - mean_simulation, color="black", linestyle="--", label="C.I")
     plt.axhline(ci[0] - mean_simulation, color="black", linestyle="--")
@@ -79,7 +79,7 @@ def plotValueWithCV(N_list, val_list, ci, std, save_dir, file_name, enableShow=F
     plt.legend(loc="best")
     sns.despine(top=True, right=True)
     if save_dir is not None:
-        plt.savefig(save_dir + "/" + file_name + ".jpg")
+        plt.savefig(save_dir + "/" + file_name + ".jpg", dpi=400)
     if enableShow:
         plt.show()
 
@@ -136,7 +136,7 @@ def plotErrorRegression(x, y, save_dir, file_name, error_filter=-8, enableShow=F
     sns.despine(top=True, right=True)
 
     if save_dir is not None:
-        plt.savefig(save_dir + "/" + file_name + ".jpg")
+        plt.savefig(save_dir + "/" + file_name + ".jpg", dpi=400)
         with open(save_dir + f"/{file_name}" + "-summary.txt", "w") as file:
             s = results.summary2().as_text()
             file.write(s)
