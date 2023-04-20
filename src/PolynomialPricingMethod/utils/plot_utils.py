@@ -6,7 +6,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from deprecated import deprecated
 import statsmodels.api as sm
 
-# plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams["font.family"] = "Times New Roman"
 
 
 @deprecated()
@@ -49,6 +49,8 @@ def plotError(x, y, process_name, save_path, enableShow=False, error_filter=-9):
         plt.savefig(save_path + "/" + "error-plot-" + process_name + ".jpg")
     if enableShow:
         plt.show()
+    else:
+        plt.close()
 
 
 def isSmallestFromKBefore(arr, i, lastK):
@@ -61,7 +63,7 @@ def isSmallestFromKBefore(arr, i, lastK):
     return res
 
 
-def plotValueWithCV(N_list, val_list, ci, std, save_dir, file_name, enableShow=False):
+def plotValueWithCI(N_list, val_list, ci, std, save_dir, file_name, enableShow=False):
     val_list = np.array(val_list)
     plt.figure()
     x = 1 / N_list
@@ -70,18 +72,22 @@ def plotValueWithCV(N_list, val_list, ci, std, save_dir, file_name, enableShow=F
     cvRange = ci[1] - ci[0]
     plt.axhline(ci[1] - mean_simulation, color="black", linestyle="--", label="C.I")
     plt.axhline(ci[0] - mean_simulation, color="black", linestyle="--")
-    plt.text(
-        np.min(x), ci[1] - mean_simulation + cvRange / 2, f"se = {std:.6f}", fontsize=12
-    )
+    # plt.text(
+    #     np.min(x), ci[1] - mean_simulation + cvRange / 2, f"se = {std:.6f}", fontsize=12
+    # )
     plt.ylim(-8 * cvRange, 8 * cvRange)
     plt.xlabel("1/N")
     plt.ylabel("Error")
-    plt.legend(loc="best")
+    plt.legend(
+        loc="best", frameon=True, framealpha=1, edgecolor="black", fontsize="small"
+    )
     sns.despine(top=True, right=True)
     if save_dir is not None:
-        plt.savefig(save_dir + "/" + file_name + ".jpg", dpi=400)
+        plt.savefig(save_dir + "/" + file_name + ".jpg", dpi=500)
     if enableShow:
         plt.show()
+    else:
+        plt.close()
 
 
 def plotErrorRegression(x, y, save_dir, file_name, error_filter=-8, enableShow=False):
@@ -136,7 +142,7 @@ def plotErrorRegression(x, y, save_dir, file_name, error_filter=-8, enableShow=F
     sns.despine(top=True, right=True)
 
     if save_dir is not None:
-        plt.savefig(save_dir + "/" + file_name + ".jpg", dpi=400)
+        plt.savefig(save_dir + "/" + file_name + ".jpg", dpi=500)
         with open(save_dir + f"/{file_name}" + "-summary.txt", "w") as file:
             s = results.summary2().as_text()
             file.write(s)

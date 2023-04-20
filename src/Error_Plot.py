@@ -17,7 +17,9 @@ from PolynomialPricingMethod.utils.plot_utils import plotErrorRegression
 from PricingMethod.CallCloseForm import BSMCloseForm, MertonCloseForm
 from PolynomialPricingMethod.utils.Tools import timeit
 
-save_dir = "/home/liam/Documents/Projects/PolyOptionPricing/Data/Error_Plot"
+save_dir = (
+    "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/Error_Plot"
+)
 # ###################### Process Setting ######################
 # Basic
 r = 0.05
@@ -39,7 +41,6 @@ eta1 = 10
 eta2 = 5
 # Gamma
 gamma_mean = -0.14
-print(gamma_mean)
 gamma_var = 0.2
 # NIG
 delta = 1.326
@@ -297,7 +298,6 @@ def RightUp():
             save_dir,
             "error-plot-" + process_name + "-rightup",
         )
-    print(f"{ref_val_close_form['VG']:.15f}")
 
 
 @deprecated()
@@ -540,13 +540,13 @@ def BothDown():
 
 
 if __name__ == "__main__":
-    print("===========Call==============")
-    Call()
+    # print("===========Call==============")
+    # Call()
     print("===========Right Up===========")
     RightUp()
     # print("Left Up")
     # LeftUp()
     # print("Both Up")
     # BothUp()
-    print("==========Both Down==========")
-    BothDown()
+    # print("==========Both Down==========")
+    # BothDown()

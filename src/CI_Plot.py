@@ -12,11 +12,13 @@ from PolynomialPricingMethod.utils.CharacteristicFunc import (
     NIG,
 )
 from PolynomialPricingMethod.utils.DensityTools import DensityRecover
-from PolynomialPricingMethod.utils.plot_utils import plotValueWithCV
+from PolynomialPricingMethod.utils.plot_utils import plotValueWithCI
 from PolynomialPricingMethod.utils.Tools import timeit
 
 ###################### Process Setting ######################
-save_dir = "/home/liam/Documents/Projects/PolyOptionPricing/Data/CI_Plot"
+save_dir = (
+    "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/CI_Plot"
+)
 # Basic
 r = 0.05
 T = 0.5
@@ -165,7 +167,7 @@ def Call():
             val_list.append(ans)
 
         # 畫圖
-        plotValueWithCV(
+        plotValueWithCI(
             N_list,
             val_list,
             simulation_res[process_name][0],
@@ -241,7 +243,7 @@ def RightUp():
             val_list.append(ans)
 
         # 畫圖
-        plotValueWithCV(
+        plotValueWithCI(
             N_list,
             val_list,
             simulation_res[process_name][0],
@@ -317,7 +319,7 @@ def LeftUp():
             val_list.append(ans)
 
         # 畫圖
-        plotValueWithCV(
+        plotValueWithCI(
             N_list,
             val_list,
             simulation_res[process_name][0],
@@ -393,7 +395,7 @@ def BothUp():
             val_list.append(ans)
         print(val_list[-1])
         # 畫圖
-        plotValueWithCV(
+        plotValueWithCI(
             N_list,
             val_list,
             simulation_res[process_name][0],
@@ -469,7 +471,7 @@ def BothDown():
             val_list.append(ans)
 
         # 畫圖
-        plotValueWithCV(
+        plotValueWithCI(
             N_list,
             val_list,
             simulation_res[process_name][0],
@@ -484,9 +486,9 @@ if __name__ == "__main__":
     Call()
     print("Right Up")
     RightUp()
-    print("Left Up")
-    LeftUp()
-    print("Both Up")
-    BothUp()
+    # print("Left Up")
+    # LeftUp()
+    # print("Both Up")
+    # BothUp()
     print("Both Down")
     BothDown()
