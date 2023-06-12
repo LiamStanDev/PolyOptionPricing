@@ -16,6 +16,7 @@ from PolynomialPricingMethod.utils.DensityTools import DensityRecover
 from PolynomialPricingMethod.utils.plot_utils import plotErrorRegression
 from PricingMethod.CallCloseForm import BSMCloseForm, MertonCloseForm
 from PolynomialPricingMethod.utils.Tools import timeit
+from PolynomialPricingMethod.utils.save_file_util import save_to_excel
 
 save_dir = (
     "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/Error_Plot"
@@ -34,8 +35,8 @@ corr = -0.1
 jump_intensity = 140
 jump_mean = 0.01
 jump_var = 0.02**2
-# KDJ
 jump_intensity_kdj = 1
+# KDJ
 p = 0.4
 eta1 = 10
 eta2 = 5
@@ -207,6 +208,10 @@ def Call():
             save_dir,
             "error-plot-" + process_name + "-call",
         )
+        save_to_excel(
+            N_list, np.array(val_list), save_dir, "error-plot-" + process_name + "-call"
+        )
+
     print(ref_val_close_form)
 
 
@@ -298,6 +303,15 @@ def RightUp():
             save_dir,
             "error-plot-" + process_name + "-rightup",
         )
+
+        save_to_excel(
+            N_list,
+            np.array(val_list),
+            save_dir,
+            "error-plot-" + process_name + "-rightup",
+        )
+
+    print(ref_val_close_form)
 
 
 @deprecated()
@@ -536,17 +550,20 @@ def BothDown():
             save_dir,
             "error-plot-" + process_name + "-bothdown",
         )
+
+        save_to_excel(
+            N_list,
+            np.array(val_list),
+            save_dir,
+            "error-plot-" + process_name + "-bothdown",
+        )
     print(ref_val_close_form)
 
 
 if __name__ == "__main__":
-    # print("===========Call==============")
-    # Call()
+    print("===========Call==============")
+    Call()
     print("===========Right Up===========")
     RightUp()
-    # print("Left Up")
-    # LeftUp()
-    # print("Both Up")
-    # BothUp()
-    # print("==========Both Down==========")
-    # BothDown()
+    print("==========Both Down==========")
+    BothDown()

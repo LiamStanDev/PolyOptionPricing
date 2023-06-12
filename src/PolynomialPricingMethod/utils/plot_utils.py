@@ -109,21 +109,23 @@ def plotErrorRegression(x, y, save_dir, file_name, error_filter=-8, enableShow=F
     Xp = polynomial_features.fit_transform(X.reshape(-1, 1))
     model = sm.OLS(Y, Xp)
     results = model.fit()
+    np.set_printoptions(precision=6)
     Y_fit = results.fittedvalues
-    print(Y_fit.shape)
     print(results.summary())
-    # if len(X) > 500:
-    #     plt.scatter(X[::15], Y[::15], marker="x", color="black")
-    # elif len(X) > 200:
-    #     plt.scatter(X[::5], Y[::5], marker="x", color="black")
-    # elif len(X) > 100:
-    #     plt.scatter(X[::2], Y[::2], marker="x", color="black")
-    # else:
-    plt.scatter(X, Y, s=1, color="black")
+
+    # 因為點太多，畫在圖片太雜，所以進行過濾
+    if len(X) > 500:
+        plt.scatter(X[::15], Y[::15], marker="x", color="black")
+    elif len(X) > 200:
+        plt.scatter(X[::5], Y[::5], marker="x", color="black")
+    elif len(X) > 100:
+        plt.scatter(X[::2], Y[::2], marker="x", color="black")
+    else:
+        plt.scatter(X, Y, s=1, color="black")
+
     # 畫fitting線
     plt.plot(X, Y_fit, color="black", linewidth=2)
 
-    # plt.title(f'{process_name}: Error Convergence with {benchmark_name} as Benchmark')
     plt.xlabel("N")
     plt.ylabel(r"$log_{10}\left(|Error|\right)$")
 
@@ -132,13 +134,14 @@ def plotErrorRegression(x, y, save_dir, file_name, error_filter=-8, enableShow=F
         if int(np.max(Y)) + 1 - np.max(Y) >= 1
         else int(np.max(Y)) + 2
     )
+
     Y_low_bound = (
         int(np.min(Y)) - 1
         if np.min(Y) - (int(np.min(Y)) - 1) >= 1
         else int(np.min(Y)) - 2
     )
     plt.ylim((Y_low_bound, Y_up_bound))
-    # plt.xticks(X)
+    plt.xticks(X)
     sns.despine(top=True, right=True)
 
     if save_dir is not None:
@@ -146,6 +149,20 @@ def plotErrorRegression(x, y, save_dir, file_name, error_filter=-8, enableShow=F
         with open(save_dir + f"/{file_name}" + "-summary.txt", "w") as file:
             s = results.summary2().as_text()
             file.write(s)
+    if enableShow:
+        plt.show()
+    else:
+        plt.close()
+
+
+def plotCOSvsBin(
+    cos_err, cos_time, bin_err, bin_time, save_dir, file_name, enableShow=False
+):
+    plt.plot(cos_time, cos_err, color="black", marker="o")
+    plt.plot(bin_time, bin_err, color="black", marker="D")
+
+    if save_dir is not None:
+        plt.savefig(save_dir + "/" + file_name + ".jpg", dpi=500)
     if enableShow:
         plt.show()
     else:

@@ -14,6 +14,7 @@ from PolynomialPricingMethod.utils.CharacteristicFunc import (
 from PolynomialPricingMethod.utils.DensityTools import DensityRecover
 from PolynomialPricingMethod.utils.plot_utils import plotValueWithCI
 from PolynomialPricingMethod.utils.Tools import timeit
+from PolynomialPricingMethod.utils.save_file_util import save_to_excel
 
 ###################### Process Setting ######################
 save_dir = (
@@ -176,6 +177,13 @@ def Call():
             "value-plot-" + process_name + "-call",
         )
 
+        save_to_excel(
+            N_list,
+            np.array(val_list),
+            save_dir,
+            "value-plot-" + process_name + "-call",
+        )
+
 
 def RightUp():
     # Polynomial Setting
@@ -248,6 +256,13 @@ def RightUp():
             val_list,
             simulation_res[process_name][0],
             simulation_res[process_name][1],
+            save_dir,
+            "value-plot-" + process_name + "-rightup",
+        )
+
+        save_to_excel(
+            N_list,
+            np.array(val_list),
             save_dir,
             "value-plot-" + process_name + "-rightup",
         )
@@ -476,6 +491,13 @@ def BothDown():
             val_list,
             simulation_res[process_name][0],
             simulation_res[process_name][1],
+            save_dir,
+            "value-plot-" + process_name + "-bothdown",
+        )
+
+        save_to_excel(
+            N_list,
+            np.array(val_list),
             save_dir,
             "value-plot-" + process_name + "-bothdown",
         )
