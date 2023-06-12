@@ -1,6 +1,6 @@
 # Introduction
 
-這是一個非常高誤差收斂率(exp(n))與定價速率(O(n))，且可以使用多種隨機過程(e.g. Heston, SVJ, VG 等)
+這是一個指數誤差收斂率(O(e(n)))與線性定價速率(O(n))，且可以使用多種隨機過程(e.g. Heston, SVJ, VG 等)
 與多項式報酬函數(一次多項式(call)，高次多項式)的選擇權定價模型。
 
 # Requirements
