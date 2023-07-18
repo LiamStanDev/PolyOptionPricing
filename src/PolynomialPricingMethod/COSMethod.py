@@ -21,14 +21,13 @@ class PolyByCosMethod:
         self.x0 = log(S0)
         self.T = T
         self.r = r
-        # self.sigma = sigma
+
         self.process_cf = process_cf
         self.poly_coeff = np.array(poly_coeff)
         if positive_interval[0] == 0:
             positive_interval[0] = 1e-4
         self.positive_interval = np.log(positive_interval)
 
-        # ============== Hyperparameter ==============
         self.N = N  # number of frequency for fitting density function
         self.lower_limit = log(lower_limit)
         self.upper_limit = log(upper_limit)

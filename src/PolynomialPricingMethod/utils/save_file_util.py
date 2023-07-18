@@ -8,4 +8,4 @@ def save_to_excel(N_arr, value_arr, save_dir, file_name):
     df = pd.DataFrame({"N": N_arr, "value": value_arr})
 
     # 保存DataFrame為Excel文件
-    df.to_excel(save_dir + "/" + file_name + ".xlsx", index=False)
+    df.to_excel(save_dir + "/" + file_name + ".xlsx", index=False, float_format="%.20f")

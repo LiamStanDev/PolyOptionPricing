@@ -1,4 +1,5 @@
 import threading
+import time
 
 # 導入自己寫的蒙地卡羅
 from PolynomialPricingMethod.PathSimulationMethod import (
@@ -12,10 +13,10 @@ from PolynomialPricingMethod.PathSimulationMethod import (
     KJDByMC,
 )
 
-# 設定蒙地卡羅次數
-n = 252  # for setting dt
-N = int(1e5)
-N_repeat = 20
+# 設定蒙地卡羅
+n = 252  # 計算dt
+N = int(1e5)  # 共有幾條Path
+N_repeat = 20  # 共進行幾次模擬，用來計算信賴區間
 save_directory = (
     "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Simulation"
 )
@@ -665,21 +666,19 @@ def BothDown():
 
 
 if __name__ == "__main__":
+    # 建立多個thread平行計算
     thread_Call = threading.Thread(target=Call)
     thread_RightUp = threading.Thread(target=RightUp)
-    # thread_LeftUp = threading.Thread(target=LeftUp)
-    # thread_BothUp = threading.Thread(target=BothUp)
     thread_BothDown = threading.Thread(target=BothDown)
 
+    # 開始計算
     thread_Call.start()
     time.sleep(1)
     thread_RightUp.start()
     time.sleep(1)
-    # thread_LeftUp.start()
-    # thread_Call.join()
-    # thread_RightUp.join()
-    # thread_LeftUp.join()
-    #
-    # thread_BothUp.start()
-    # time.sleep(1)
     thread_BothDown.start()
+
+    # Main thread 等待
+    thread_Call.join()
+    thread_RightUp.join()
+    thread_BothDown.join()

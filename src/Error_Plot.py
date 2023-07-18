@@ -2,6 +2,7 @@ from math import inf
 from deprecated import deprecated
 import numpy as np
 from numpy import sqrt
+import threading
 from PolynomialPricingMethod.COSMethod import PolyByCosMethod
 from PolynomialPricingMethod.utils.CharacteristicFunc import (
     GBM,
@@ -18,9 +19,11 @@ from PricingMethod.CallCloseForm import BSMCloseForm, MertonCloseForm
 from PolynomialPricingMethod.utils.Tools import timeit
 from PolynomialPricingMethod.utils.save_file_util import save_to_excel
 
+# 結果存放地址
 save_dir = (
     "/Users/lindazhong/Documents/Code/Projects/PolyOptionPricing/Data/Error/Error_Plot"
 )
+
 # ###################### Process Setting ######################
 # Basic
 r = 0.05
@@ -111,6 +114,8 @@ def Call():
     poly_coeff = [-100, 1]
     positive_interval = [100, inf]
 
+    # 存放誤差收斂的reference value的值
+    # None表示在程式進行中會使用本論文的方式使用10的5次方個N進行算
     ref_val_close_form = {
         "GBM": BSMCloseForm(S0=S0, r=r, sigma=sigma, T=T, K=100).getValue(),
         "Heston": 6.8816576853411586256470400257967412471771240234375,
@@ -134,30 +139,24 @@ def Call():
     for process_name in processes.keys():
         print("========", process_name, "=============")
         best_positive_interval = positive_interval.copy()
-        # VG 會爆掉
-        if process_name == "VG":
-            densityRecover = DensityRecover(
-                S0=S0,
-                process_cf=processes[process_name],
-                poly_coeff=poly_coeff,
-                positive_interval=positive_interval,
-                error_acceptance=1e-12,
-            )
-        else:
-            densityRecover = DensityRecover(
-                S0=S0,
-                process_cf=processes[process_name],
-                poly_coeff=poly_coeff,
-                positive_interval=positive_interval,
-                error_acceptance=1e-15,
-            )
+
+        # 設定計算u與l的參數
+        densityRecover = DensityRecover(
+            S0=S0,
+            process_cf=processes[process_name],
+            poly_coeff=poly_coeff,
+            positive_interval=positive_interval,
+            error_acceptance=1e-15,
+        )
+        # 取得density end point pair 與 product of density and payoff end point pair
         (
-            lower_limit,
-            upper_limit,
-            best_positive_interval[0],
-            best_positive_interval[-1],
+            lower_limit,  # density l
+            upper_limit,  # density u
+            best_positive_interval[0],  # product l
+            best_positive_interval[-1],  # product u
         ) = densityRecover.getIntegralRangeAndInterval()
 
+        # 取得reference value如果為None，就使用本論文的方式計算
         ref_val = ref_val_close_form[process_name]
         if ref_val is None:
             ref_val = PolyByCosMethod(
@@ -174,19 +173,20 @@ def Call():
             ).getValue()
         ref_val_close_form[process_name] = ref_val
 
+        # 畫圖要使用的N的範圍，[1:]表示去掉N=0的點
         plot_N_Config = {
             "GBM": list(range(0, 1000, 1))[1:],
             "Heston": list(range(0, 1000, 1))[1:],
             "MJD": list(range(0, 1000, 1))[1:],
             "KJD": list(range(0, 1000, 1))[1:],
             "SVJ": list(range(0, 1000, 1))[1:],
-            "SVCDJ": list(range(0, 5000, 1))[1:],
+            # "SVCDJ": list(range(0, 5000, 1))[1:],
             "VG": list(range(0, 5000, 1))[1:],
             "NIG": list(range(0, 1000, 1))[1:],
         }
 
-        N_list = plot_N_Config[process_name]
-        val_list = []
+        N_list = plot_N_Config[process_name]  # 取得指定process的N的範圍
+        val_list = []  # 存放不同N的計算結果，N_list多長val_list就有多長
         for N in N_list:
             res = PolyByCosMethod(
                 S0=S0,
@@ -202,12 +202,16 @@ def Call():
             )
             ans, time_consuming = timeit(res.getValue)
             val_list.append(ans)
-        plotErrorRegression(
-            N_list,
-            np.abs(np.array(val_list) - ref_val),
-            save_dir,
-            "error-plot-" + process_name + "-call",
-        )
+
+        # 畫圖 (後來使用excel畫所以註解掉了)
+        # plotErrorRegression(
+        #     N_list,
+        #     np.abs(np.array(val_list) - ref_val),
+        #     save_dir,
+        #     "error-plot-" + process_name + "-call",
+        # )
+
+        # 存到excel
         save_to_excel(
             N_list, np.array(val_list), save_dir, "error-plot-" + process_name + "-call"
         )
@@ -270,14 +274,14 @@ def RightUp():
         ).getValue()
         ref_val_close_form[process_name] = ref_val
         plot_N_Config = {
-            "GBM": list(range(0, 1000, 1))[1:],
-            "Heston": list(range(0, 1000, 1))[1:],
-            "MJD": list(range(0, 1000, 1))[1:],
-            "KJD": list(range(0, 1000, 1))[1:],
-            "SVJ": list(range(0, 1000, 1))[1:],
-            "SVCDJ": list(range(0, 5000, 1))[1:],
+            "GBM": list(range(0, 2000, 1))[1:],
+            "Heston": list(range(0, 2000, 1))[1:],
+            "MJD": list(range(0, 2000, 1))[1:],
+            "KJD": list(range(0, 2000, 1))[1:],
+            "SVJ": list(range(0, 2000, 1))[1:],
+            # "SVCDJ": list(range(0, 5000, 1))[1:],
             "VG": list(range(0, 5000, 1))[1:],
-            "NIG": list(range(0, 1000, 1))[1:],
+            "NIG": list(range(0, 2000, 1))[1:],
         }
 
         val_list = []
@@ -297,12 +301,12 @@ def RightUp():
             )
             ans, time_consuming = timeit(res.getValue)
             val_list.append(ans)
-        plotErrorRegression(
-            N_list,
-            np.abs(np.array(val_list) - ref_val),
-            save_dir,
-            "error-plot-" + process_name + "-rightup",
-        )
+        # plotErrorRegression(
+        #     N_list,
+        #     np.abs(np.array(val_list) - ref_val),
+        #     save_dir,
+        #     "error-plot-" + process_name + "-rightup",
+        # )
 
         save_to_excel(
             N_list,
@@ -465,12 +469,12 @@ def BothUp():
             )
             ans, time_consuming = timeit(res.getValue)
             val_list.append(ans)
-        plotErrorRegression(
-            N_list,
-            np.abs(np.array(val_list) - ref_val),
-            save_dir,
-            "error-plot-" + process_name + "-bothup",
-        )
+        # plotErrorRegression(
+        #     N_list,
+        #     np.abs(np.array(val_list) - ref_val),
+        #     save_dir,
+        #     "error-plot-" + process_name + "-bothup",
+        # )
     print(ref_val_close_form)
 
 
@@ -544,12 +548,12 @@ def BothDown():
             )
             ans, time_consuming = timeit(res.getValue)
             val_list.append(ans)
-        plotErrorRegression(
-            N_list,
-            np.abs(np.array(val_list) - ref_val),
-            save_dir,
-            "error-plot-" + process_name + "-bothdown",
-        )
+        # plotErrorRegression(
+        #     N_list,
+        #     np.abs(np.array(val_list) - ref_val),
+        #     save_dir,
+        #     "error-plot-" + process_name + "-bothdown",
+        # )
 
         save_to_excel(
             N_list,
@@ -561,9 +565,10 @@ def BothDown():
 
 
 if __name__ == "__main__":
+    # 使用muti-threading 平行計算
     print("===========Call==============")
-    Call()
+    threading.Thread(target=Call).start()
     print("===========Right Up===========")
-    RightUp()
+    threading.Thread(target=RightUp).start()
     print("==========Both Down==========")
-    BothDown()
+    threading.Thread(target=BothDown).start()
