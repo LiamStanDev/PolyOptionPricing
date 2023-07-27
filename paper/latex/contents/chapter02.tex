@@ -1,0 +1,259 @@
+% !TeX root = ../main.tex
+
+\chapter{Methodology}
+
+\section{Definition of Polynomial Options}
+The polynomial option alters the linear form inside a plain-vanilla option into a polynomial form. The payoff function can be expressed as
+$$
+    {\rm payoff} = \left(A\left(S_T\right)\right)^+.
+$$
+\textbf{Assumptions:}
+\begin{enumerate}
+    \item $A\left(S_T\right)$ is a polynomial function means it can be expressed below
+    $$
+    A\left(S_T\right)=a_0+a_1{S_T}^1+\ldots+a_k{S_T}^k+\ldots+a_n{S_T}^n=\sum_{j=0}^{n}a_j {S_T}^{j}.
+    $$
+    \item All positive roots of $A\left(S_T\right)$ are known.
+    \item The payoff function has non-negative values in $\left[\underline{\lambda}_1,\,\overline{\lambda}_1\right],\,\left[\underline{\lambda}_2,\,\overline{\lambda}_2\right],\cdots,\,\left[\underline{\lambda}_D,\,\overline{\lambda}_D\right]$.\footnote{Note all $\lambda$ are represented in $x$ space which $x = ln\left(S_T\right)$, so $\lambda$ are the polynomial roots after transform into $x$. By analyzing the results of the polynomial roots and leading term, we can determine which intervals the polynomial function is positive or negative. These intervals can be used to simplify the calculation of the polynomial option. These are crucial for the derivation of the pricing formula.}
+\end{enumerate}
+
+
+\section{Pricing Method Foundation}
+Pricing polynomial options can be challenging, particularly when separating the option's payoff and density. However, Fang and Oosterlee (2008) have developed a powerful pricing framework called the COS method, seeing the equation ($\ref{eq:COS method}$). The COS method employs Fourier-cosine expansion in density function and can effectively separate the influence of the option's payoff and density. This approach has made it easier to price complex payoff functions under various stochastic processes, and it still has excellent error convergence. Chapter 3 will provide evidence of its exceptional computational efficiency and convergence accuracy.\\
+
+Let $x=ln\left(S_T\right)$, then the option pricing model can be expressed
+\begin{align*}
+    \widetilde{v} &= e^{-rT}\int_{-\infty}^{\infty}w\left(x\right)f\left(x\right){\rm d}x \nonumber \\
+    &\approx e^{-rT}\int_{l}^{u}w\left(x\right)f\left(x\right){\rm d}x. \\ \nonumber
+\end{align*}
+
+Replace the density function with its Fourier-cosine expansion,
+$$
+    f\left(x\right)=\sum_{k=0}^{\infty}^{'}A_k cos\left(k \pi \frac{x - l}{u - l}\right),
+$$
+where $A_k \approx \frac{2}{u - l} {\rm Re}\left\{\varphi\left(\frac{k\pi}{u-l}\right){\rm e}^{-i\frac{kl\pi}{u-l}}\right\}.$ $A_k$ is approximated by the characteristic function. The approximation is accurate when the $l$ and $r$ are large enough. \\
+
+So that,
+\begin{align*}
+    \widetilde{v} 
+    &\approx e^{-rT}\int_{l}^{u}w\left(x\right)\sum_{k=0}^{\infty}^{'}\frac{2}{u - l} {\rm Re}\left\{\varphi\left(\frac{k\pi}{u-l}\right){\rm e}^{-i\frac{kl\pi}{u-l}}\right\}cos\left(k \pi \frac{x - l}{u - l}\right) {\rm d}x  \\
+    &\approx e^{-rT}\sum_{k=0}^{N-1}^{'} {\rm Re}\left\{\varphi\left(\frac{k\pi}{u-l}\right){\rm e}^{-i\frac{kl\pi}{u-l}}\right\}\frac{2}{u - l}\int_{l}^{u}w\left(x\right)cos\left(k \pi \frac{x - l}{u - l}\right){\rm d}x.  \\
+\end{align*}
+
+Let 
+$$ 
+    V_k = \frac{2}{u - l}\int_{l}^{u}w\left(x\right)cos\left(k \pi \frac{x - l}{u - l}\right){\rm d}x.
+$$
+
+
+Finally, $\widetilde{v}$ can be express as
+\begin{align}
+\widetilde{v} = {\rm e}^{-rT}\sum_{k=0}^{N-1}^{'}{\rm Re}\left\{\varphi\left(\frac{k\pi}{u-l}\right){\rm e}^{ik\pi\frac{x-l}{u-l}}\right\}V_k, \label{eq:COS method}
+\end{align}
+where $\widetilde{v}$ is option value, $\left[u,\, l\right]$ is a truncation range based on how accurate you require to approximate improper integral\footnote{There are many ways to determine the transition range of improper integral. The method used in this paper will demonstrate in Chapter 3.}, $w\left(x\right)$ is payoff function, $f\left(x\right)$ is density, $Re\left(\cdot\right)$ denotes only taking the real part of the number inside, $\varphi\left(x\right)$ is the return characteristic function which is extracted from price characteristic function $\phi\left(v\right)$ based on the expression, $\phi\left(v\right)=\varphi\left(v\right){\rm e}^{iv x}$, $N$ represents how many cosine functions to fit the density, and $V_k$ can be obtained analytically according to the polynomial payoff function $w(x)$. There are two main errors in the COS method which are the integral truncation range and the number of cosine functions used for approximating the density function. Note $\sum_{}^{}^{'}$ indicates that the first term in the summation is weighted by one-half. 
+
+
+\section{Analytical Solution of $V_k$}
+Founded on the COS method, it is necessary to derive the analytic solution of $V_k$, which is fully independent of the stochastic process and only depends on the payoff function, as can be seen from the equation ($\ref{eq:Vk}$). Based on the COS method framework, $V_k$ can be written as
+\begin{align}
+    V_k =\frac {2}{u-l} \int_l ^u w \left( x \right) \cos \left( k \pi \frac{x-l}{u-l} \right) {\rm d}x. \label{eq:Vk}
+\end{align}
+
+Given the setting of the polynomial option's payoff, we can rewrite $A\left(S_T\right)$ by letting $x=\mathrm{ln}\left(S_T\right)$
+\begin{align*}
+    A\left(S_T\right)=\sum_{j=0}^{n}a_j {S_T}^{j} =\sum_{j=0}^{n}a_j{\rm e}^{j \cdot \mathrm{ln}\left(S_T\right)} =\sum_{j=0}^{n}a_j{\rm e}^{j \cdot x}.
+\end{align*}
+
+Substitute into $w(x)$, then get
+\begin{align}
+    w\left(x\right) = \left(A\left(S_T\right)\right)^{+}=\left(\sum_{j=0}^{n}a_j{\rm e}^{j \cdot x} \right)^{+}=\left(a_0+\sum_{j=1}^{n}a_j{\rm e}^{j \cdot x} \right)^{+}. \label{eq:wx}
+\end{align}
+Note the $n$ represents the order of the polynomial function. \\
+
+By replacing $w\left(x\right)$ by ($\ref{eq:wx}$) in ($\ref{eq:Vk}$), $V_k$ can be represented as
+\begin{align*} 
+    V_k &= \frac {2}{u-l} \int_l ^u \left(a_0+\sum_{j=1}^{n}a_j{\rm e}^{j \cdot x} \right)^{+} \cos \left( k \pi \frac{x-l}{u-l} \right) {\rm d}x.
+\end{align*}
+
+Because of knowing all the positive roots and non-negative regions, we can simplify the calculation by only integrating the non-zero parts,
+\begin{align*}
+    V_k =  \frac {2}{u-l}&\left[\int_{\underline{\lambda}_1}^{\overline{\lambda}_1}\left(a_0+\sum_{j=1}^na_j{\rm e}^jx\right)\cos \left(k\pi \frac{x-l}{u-l}\right)\,{\rm d}x +\cdots\right. \\
+    & +\int_{\underline{\lambda}_d}^{\overline{\lambda}_d}\left(a_0+\sum_{j=1}^na_j{\rm e}^jx\right)\cos \left(k\pi \frac{x-l}{u-l}\right)\,{\rm d}x +\cdots                               \\
+    & +\left. \int_{\underline{\lambda}_D}^{\overline{\lambda}_D}\left(a_0+\sum_{j=1}^na_j{\rm e}^jx\right)\cos \left(k\pi \frac{x-l}{u-l}\right)\,{\rm d}x\right].
+\end{align*}
+
+Focus on the common part of the whole integral,
+\begin{align}
+    \int_{\underline{\lambda}_d}^{\overline{\lambda}_d}\left(a_0 + \sum_{j=1}^na_j{\rm e}^jx\right)\cos \left(k\pi \frac{x-l}{u-l}\right)\, {\rm d}x. \label{common part}
+\end{align}
+
+By separating the integral of ($\ref{common part}$) into two parts, we acquire the following expression,
+\begin{align}
+     &\int_{\underline{\lambda}_d}^{\overline{\lambda}_d}\left(a_0+\sum_{j=1}^na_j{\rm e}^jx\right)\cos \left(k\pi \frac{x-l}{u-l}\right)\,{\rm d}x \nonumber \\
+     & = \underbrace{a_0\int_{\underline{\lambda}_d}^{\overline{\lambda}_d}\cos \left(k\pi\frac{x-l}{u-l}\right)\,{\rm d}x}_{\psi_k\left(\underline{\lambda}_d, \overline{\lambda}_d \right)}+\underbrace{\sum_{j=1}^n a_j \int_{\underline{\lambda}_d}^{\overline{\lambda}_d} {\rm e}^{jx} \cos \left( k \pi \frac{x-l}{u-l} \right) \, {\rm d}x}_{\chi_k\left(\underline{\lambda}_d, \overline{\lambda}_d \right)} \nonumber \\
+     & =\psi_k\left(\underline{\lambda}_d,  \overline{\lambda}_d\right)+\chi_k\left(\underline{\lambda}_d, \overline{\lambda}_d \right). \label{common party by symbol Vk}
+\end{align}
+
+So that $V_k$ can be rewritten as,
+\begin{align}
+    V_k=\frac{2}{u-l}\sum_{d=1}^{D}\left[\psi_k\left( \underline{\lambda}_d, \overline{\lambda}_d \right) + \chi_k\left(\underline{\lambda}_d, \overline{\lambda}_d \right) \right].\label{simplify Vk}
+\end{align}
+
+
+$\psi_k\left( \underline{\lambda}_d, \overline{\lambda}_d \right)$ can be easily found by simply integrating ($\ref{common party by symbol Vk}$),
+\begin{align}
+    \psi_k\left( \underline{\lambda}_d, \overline{\lambda}_d \right)
+    =
+        \begin{cases}
+        a_0\left( \overline{\lambda}_d - \underline{\lambda}_d \right) \, & k=0  \\
+        \left.\frac{a_0\left(u-l\right)}{k\pi}\sin\left(k\pi\frac{x-l}{u-l}\right)\right|_{\underline{\lambda}_d}^{\overline{\lambda}_d}\, & o.w.
+    \end{cases}. \label{phi}
+\end{align}
+
+The integral inside of $\chi_k \left( \underline{\lambda}_d, \overline{\lambda}_d \right)$ can be solved by using integration by parts,
+\begin{align}
+    \int_{\underline{\lambda}_d}^{\overline{\lambda}_d} {\rm e}^{jx} \cos \left( k \pi \frac{x-l}{u-l} \right) \, {\rm d}x= \frac{a_j}{1+\left(\frac{k\pi}{j\left(u-l\right)}\right)^2} & \left[\frac{1}{j}\left.\cos\left(k\pi\frac{x-l}{u-l}{\rm e}^{jx}\right)\right|_{\underline{\lambda}_d} ^{\overline{\lambda}_d}\right. \nonumber \\
+    & \left.+\frac{k\pi}{j^2\left(u-l\right)}\left.\sin\left(k\pi\frac{x-l}{u-l}\right){\rm e}^j\right|_{\underline{\lambda}_d} ^{\overline{\lambda}_d}\right], \nonumber
+\end{align}
+So that $\chi_k \left( \underline{\lambda}_d, \overline{\lambda}_d \right)$ can be expressed as,
+\begin{align}
+    \chi_k \left( \underline{\lambda}_d, \overline{\lambda}_d \right) =\sum_{j=1}^{n}\frac{a_j}{1+\left(\frac{k\pi}{j\left(u-l\right)}\right)^2} & \left[\frac{1}{j}\left.\cos\left(k\pi\frac{x-l}{u-l}{\rm e}^{jx}\right)\right|_{\underline{\lambda}_d} ^{\overline{\lambda}_d}\right. \nonumber \\
+    & \left.+\frac{k\pi}{j^2\left(u-l\right)}\left.\sin\left(k\pi\frac{x-l}{u-l}\right){\rm e}^j\right|_{\underline{\lambda}_d} ^{\overline{\lambda}_d}\right]. \label{cosi}
+\end{align}
+
+Finally, the expression of $V_k$ is obtained by combining the result of (\ref{cosi}) and (\ref{phi}) into (\ref{simplify Vk}), and it proved the solution to $V_k$ can be represented analytically.
+
+\section{Characteristic Functions}
+One of the most powerful features of my pricing method is that it allows separating the option's payoff function from the stochastic process of its underlying asset. This means that, regardless of the specific form of the payoff function, it can be used in the same pricing method by simply replacing the characteristic function of the underlying asset's stochastic process. The characteristic function of the underlying asset's return can be simplified by the expression, $\phi\left(v;x\right)=\varphi\left(v\right){\rm e}^{iv x}$, for most of price dynamics. I provided the characteristic functions of various stochastic processes used, citing Black and Scholes (1973), Heston (1993), Merton (1976), Kou (2002), Bates (1996), Madan and Seneta (1990), Barndorff-Nielsen (1997), and notes from Prof. Miao, Wei-Chung at National Taiwan University of Science and Technology.\\
+
+\noindent\textbf{2.4.1 Geometric Brownian Motion}. 
+The stochastic process can be represented by
+\begin{align*}
+    d S_t & = r S_t d t+ \sigma S_t d W_t^Q.
+\end{align*}
+The characteristic function of return can be represented by
+\begin{align*}
+\varphi(v) & =\mathrm{exp} \left[iv\left(r-\frac{\sigma^2}{2}\right)T-\frac{1}{2}v^2 \sigma^2 T \right]. \\
+\end{align*}
+
+
+
+
+
+\noindent\textbf{2.4.2 Stochastic volatility Model}. 
+The stochastic process can be represented by 
+\begin{align*}
+    d S_t & = r S_t d t+\sqrt{\nu_t} S_t d W_{1, t}^Q, \\
+    d \nu_t & = \kappa_v\left(\overline{\nu}-\nu_t\right) d t+\sigma_v \sqrt{\nu_t} d W_{2, t}^Q,
+\end{align*}
+where $\operatorname{Corr}\left(d W_{1, t}, \, d W_{2, t}\right)=\rho$. The characteristic function of return can be represented by
+\begin{align*}
+\varphi(v) & =\mathrm{exp} \left[C(v)+D(v) \nu_0\right],
+\end{align*}
+where $C(v)$ and $D(v)$ are
+\begin{align*}
+C(v) & =i v r t+\frac{\kappa_v \overline{\nu}}{\sigma_v^2}\left[(\kappa_v-i v \rho \sigma_v-b) t-2 \mathrm{ln} \left(\frac{1-a e^{-b T}}{1-a}\right)\right], \\
+D(v) & =\frac{\kappa_v-i v \rho \sigma_v-b}{\sigma_v^2}\left(\frac{1-e^{-b T}}{1-a e^{-b T}}\right), \\
+a & =\frac{\kappa_v-i v \rho \sigma_v-b}{\kappa_v-i v \rho \sigma_v+b}, \\
+b & =\sqrt{(i v \rho \sigma_v-\kappa_v)^2+\sigma_v^2\left(i v+v^2\right)}. \\
+\end{align*}
+
+
+
+\noindent\textbf{2.4.3 Log-normal Jump Diffusion Model}.
+The stochastic process can be represented by
+\begin{align*}
+    d S_t & = \mu S_t d t+\sigma S_t d W_t^Q+S_t(Y-1) d N_t,
+\end{align*}
+where $\mathrm{ln} Y \sim \mathcal{N}\left(\gamma, \delta^{2}\right)$, and $N_t$ is a Poisson jump process with intensity $\lambda$ that is independent of $W_t^Q$ and $Y$. The characteristic function of return can be represented by
+\begin{align*}
+\varphi(v) & =\mathrm{exp} \left[iv\left(\mu - \frac{\sigma^2}{2}\right)T - \frac{1}{2}v^2\sigma^2T-\lambdaT\left(1- e^{iv\gamma-\frac{1}{2}v^2\delta^2}\right)\right],
+\end{align*}
+where $\mu = r - \lambda k$ and $ k = e^{\gamma+\frac{1}{2} \delta^2}-1$. \\
+
+
+\noindent\textbf{2.4.4 Double Exponential Jump Model}.
+The stochastic process can be represented by
+\begin{align*}
+    d S_t & = \mu S_t d t+\sigma S_t d W_t^Q+S_t(Y-1) d N_t,
+\end{align*}
+where
+$$
+Y = 
+\begin{cases}
++\xi^+ \quad {\rm with\, \, \, prob.} \quad p \\
+-\xi^- \quad {\rm with\, \, \, prob.} \quad 1-p
+\end{cases}
+{\rm , and} \quad
+\begin{cases}
++\xi^+ \sim \rm{Exp}\left( \eta_1 \right) \\
+-\xi^- \sim \rm{Exp}\left( \eta_2 \right)
+\end{cases},
+$$
+and $N_t$ is an independent Poisson jump process with intensity $\lambda_e$. The characteristic function of return can be represented by
+\begin{align*}
+\varphi(v) & =\mathrm{exp} \left[iv\left(\mu - \frac{\sigma^2}{2}\right)T - \frac{1}{2}v^2\sigma^2T-\lambdaT\left(1- \frac{p\eta_1}{\eta_1 - iv} + \frac{\left(1-p\right)\eta_2}{\eta_2 + iv}\right)\right],\\
+\end{align*}
+where $\mu = r - \lambda_e k$ and $k = \frac{p\eta_1}{\eta_1 - 1} + \frac{\left(1-p\right)\eta_2}{\eta_2 + 1}-1$. \\
+
+
+
+\noindent\textbf{2.4.5 Stochastic volatility Jump Model}.
+The stochastic process can be represented by
+\begin{align*}
+    d S_t & = \mu S_t d t+\sqrt{\nu_t} S_t d W_{1, t}^Q+S_t(Y-1) d N_t, \\
+    d \nu_t & = \kappa_v\left(\overline{\nu}-\nu_t\right) d t+\sigma_v \sqrt{\nu_t} d W_{2, t}^Q,
+\end{align*}
+where $\operatorname{Corr}\left(d W_{1, t}, \, d W_{2, t}\right)=\rho$ and $\mathrm{ln} Y \sim \mathcal{N}\left(\gamma, \delta^{2}\right)$, and $N_t$ is a Poisson jump process with intensity to be $\lambda$ and independent of $W^Q_{1,t}$, $W^Q_{2,t}$, and $Y$. The characteristic function of return can be represented by
+\begin{align*}
+\varphi(v) & =\mathrm{exp} \left[C(v)+D(v) \nu_0-\lambda T\left(1-e^{i v \gamma-\frac{1}{2} v^2 \delta^2}\right)\right],
+\end{align*}
+where $C(v)$ and $D(v)$ are
+\begin{align*}
+C(v) & =i v \mu T+\frac{\kappa_v \theta}{\sigma_v^2}\left[\left(\kappa_v-i v \rho \sigma_v-b\right) T-2 \mathrm{ln} \left(\frac{1-a e^{-b T}}{1-a}\right)\right], \\
+D(v) & =\frac{\kappa_v-i v \rho \sigma_v-b}{\sigma_v^2}\left(\frac{1-e^{-b T}}{1-a e^{-b T}}\right), \\
+a & =\frac{\kappa_v-i v \rho \sigma_v-b}{\kappa_v-i v \rho \sigma_v+b} \\
+b & =\sqrt{(i v \rho \sigma_v-\kappa_v)^2+\sigma_v^2\left(i v+v^2\right)}, \\
+\mu & =r-q-\lambda k, \\ 
+k &= e^{\gamma+\frac{1}{2} \delta^2}-1.
+\end{align*}
+
+
+
+\noindent\textbf{2.4.6 Normal Inverse Gaussian Model}.
+The stochastic process can be represented by
+\begin{align*}
+    S_T &= S_0 \mathrm{exp}\left[\mu T + X_T\right] ,
+\end{align*}
+where $X_T \sim \mathcal{NIG}\left(\alpha, \beta, \xi\right)$. The characteristic function of return can be represented by
+\begin{align*}
+\varphi(v) & = \mathrm{exp}\left[\xi T\left(\sqrt{\alpha^2-\beta^2}-\sqrt{\alpha^2 - \left(\beta + iv\right)^2}\right)\right],
+\end{align*}
+where $\mu=r-\frac{\mathrm{ln}\varphi\left(-i\right)}{T}=r-\xi \left(\sqrt{\alpha^2 - \beta^2} - \sqrt{\alpha^2 - \left(\beta+1\right)^2}\right).$\\
+
+
+
+
+\noindent\textbf{2.4.7 Variance Gamma Model}.
+The stochastic process can be represented by
+\begin{align*}
+    S_T &= S_0 \mathrm{exp}\left[\mu T + X_T\right], \\
+    d X_t &= \theta d G_t + \tau \sqrt{d G_t}Z,
+\end{align*}
+where $d G_t \sim \Gamma\left( \frac{d t}{\omega}, \omega \right)$ and $Z \sim \mathcal{N}\left(0, 1\right)$. The characteristic function of return can be represented by
+\begin{align*}
+\varphi(v) & = \left(1 - iv\theta \omega + \frac{1}{2} \tau^2 \omega v^2\right)^{-\frac{T}{\omega}},
+\end{align*}
+where $\mu=r-\frac{\mathrm{ln}\varphi\left(-i\right)}{T}=r + \frac{1 + \theta \omega - \frac{1}{2}\tau^2\omega}{\omega T}$.\\
+
+
+\section{General Pricing Model}
+We have successfully derived the analytical solution of $V_k$ and the characteristic function of return in the preceding sections. Now I will present my result of the general pricing method. I will also discuss the use of different payoff functions and some well-known price dynamics in detail in Chapter 3.\\
+
+The general pricing formula for the polynomial option can be expressed,
+\begin{align}
+    \widetilde{v} \approx {\rm e}^{-rT}\sum_{k=0}^{N-1}^{'}&\left\{{\rm Re}\left\{\varphi\left(\frac{k\pi}{u-l}\right){\rm e}^{ik\pi\frac{x-l}{u-l}}\right\}\right. \nonumber \\ 
+    &\left.\frac{2}{u-l}\sum_{d=1}^{D}\left[\psi_k\left( \underline{\lambda}_d, \overline{\lambda}_d \right) + \chi_k\left(\underline{\lambda}_d, \overline{\lambda}_d \right)\right] \right\}.
+\end{align}
+
+Note that $N$ does not depend on the specific configuration of the payoff function. As $N$ increases, we can obtain a more accurate result. $D$ depends on the number of ranges between two roots that exhibit positive values, and $n$ which is inside $\chi_k$ and $\psi_k$ is a result of the order of the polynomial payoff function setting.\\
